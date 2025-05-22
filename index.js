@@ -2,9 +2,37 @@ const spriteWidth = 80;
 const spriteHeight = 80;
 const delimiterArray = [155, 255, 255, 255];  // 0x9bffffff
 const buildingsWanted = [
-  [2001, 2002, 2003], [2011, 2012, 2013, 2014], [2302, 2315, 2319],
-  [2303, 2304, 2305]
+  [2001, 2002, 2003],        // Conveyor Belts
+  [2011, 2012, 2013, 2014],  // Sorters
+  [2302, 2315, 2319],        // Smelters
+  [2303, 2304, 2305, 2318]   // Assemblers
 ];
+
+const blueprintInput = document.getElementById('blueprintInput');
+const pasteButton = document.getElementById('pasteButton');
+const decodeButton = document.getElementById('decodeButton');
+const blueprintOutput = document.getElementById('blueprintOutput');
+const copyButton = document.getElementById('copyButton');
+const errorMessageDiv = document.getElementById('error-message');
+
+pasteButton.addEventListener(
+    'click', getClip);  // Assuming getClip is global or imported
+decodeButton.addEventListener(
+    'click', Decode);  // Assuming Decode is global or imported
+copyButton.addEventListener(
+    'click', Copy);  // Assuming Copy is global or imported
+
+function showError(message) {
+  errorMessageDiv.textContent = message;
+  errorMessageDiv.style.display = 'block';
+  blueprintInput.style.borderColor = 'var(--error-border-color)';  // Visual cue
+}
+
+function hideError() {
+  errorMessageDiv.textContent = '';
+  errorMessageDiv.style.display = 'none';
+  blueprintInput.style.borderColor = 'var(--input-border-color)';  // Reset
+}
 
 const itemsJsonPath = '/items-en-US.json';
 let itemsData;
@@ -23,7 +51,6 @@ try {
   // Handle any errors that occurred during fetch or JSON parsing
   console.error('Could not load items data:', error);
 }
-console.log(itemsData[2001])
 
 
 
@@ -57,7 +84,7 @@ function setupSpriteContainer(containerId) {
   if (!container) return;  // Exit if container not found
   const border = container.querySelector('.border');
   const sprites = container.querySelectorAll('.sprite');
-  const selectedSpan = document.getElementById(containerId + '-selected');
+  const selectedSpan = document.getElementById(containerId + '-selected-name');
 
   function updateSpritePosition(sprite) {
     const x = parseInt(sprite.dataset.x);
@@ -141,8 +168,11 @@ function setupSpriteContainer(containerId) {
         break;
       }
     }
-    border.style.left = `${index * (spriteWidth + 20) + 15}px`;
-    selectedSpan.textContent = thisName;
+    border.style.left = `${index * (spriteWidth + 16) + 15}px`;
+    let mySplit = thisName.split('-sprite');
+    selectedSpan.textContent =
+        itemsData[buildingsWanted[mySplit[0].substring(1) - 1][mySplit[1] - 1]]
+            .name;
   }
 
   function getSelectedIndex() {
@@ -202,15 +232,36 @@ function csharpTicksToJSDate(ticks) {
 }
 
 async function getClip() {
-  const text = await navigator.clipboard.readText();
-  console.log(text)
-  document.getElementById('Input').value = text
-  Decode()
+  const blueprintInput = document.getElementById('blueprintInput');
+  if (!blueprintInput) {
+    console.error('Blueprint input element not found!');
+    return;
+  }
+
+  try {
+    // This is the line that might trigger a permission prompt
+    const text = await navigator.clipboard.readText();
+    console.log('Pasted text:', text);
+    blueprintInput.value = text;
+
+    // Call Decode immediately after successful paste
+    if (typeof Decode === 'function') {
+      Decode();
+    } else {
+      console.warn('Decode function is not defined.');
+    }
+  } catch (err) {
+    console.error('Failed to read clipboard contents: ', err);
+    // Optionally, inform the user that paste failed
+    // e.g., showError("Failed to paste from clipboard. Please check
+    // permissions.");
+  }
 }
+
 window.getClip = getClip;
 
 async function Copy() {
-  const text = document.getElementById('Output').value;
+  const text = document.getElementById('blueprintOutput').value;
   navigator.clipboard.writeText(text);
 }
 window.Copy = Copy;
@@ -220,7 +271,7 @@ let decodedData;
 let predata;
 
 function Decode() {
-  let bp_string = document.getElementById('Input').value
+  let bp_string = document.getElementById('blueprintInput').value
   // document.getElementById('Output').value = bp_string;
   const inputIndex = bp_string.lastIndexOf('"');
   const hashed_data = bp_string.substring(0, inputIndex);
@@ -254,6 +305,8 @@ function Decode() {
     const buildingIdHexLECorrected =
         hexsplit[i].slice(10, 12) + hexsplit[i].slice(8, 10);
     let building = parseInt(buildingIdHexLECorrected, 16)
+    console.log(
+        parseInt(hexsplit[i].slice(14, 16) + hexsplit[i].slice(12, 14), 16))
 
     for (const buildingtype in buildingsWanted) {
       let index = buildingsWanted[buildingtype].indexOf(building)
@@ -263,12 +316,6 @@ function Decode() {
         break
       }
     }
-    // Belt Test
-    // let Belt = [2001, 2002, 2003].indexOf(building);
-    // let Sorter = [2011, 2012, 2013, 2014].indexOf(building);
-    // let Smelter = [2302, 2315, 2319].indexOf(building);
-    // let Assembling = [2303, 2304, 2305].indexOf(building);
-    // console.log(Belt, Sorter, Smelter, Assembling);
   }
 
 
@@ -297,7 +344,7 @@ function encode() {
       // Convert byte to a 2-character hex string, padding with '0' if needed
       hex += byte.toString(16).padStart(2, '0');
       console.log(data)
-      // data = data.slice(0, 8) + hex + data.slice(10)
+      data = data.slice(0, 8) + hex + data.slice(10)
       hex = '';
       // Convert byte to a 2-character hex string, padding with '0' if needed
       // if ("d2" == data.slice(8, 10)) {
@@ -324,7 +371,7 @@ function encode() {
   let newHash = md5(encoded, true, true);
   let finalstring = encoded + '"' + newHash.toUpperCase();
   console.log(finalstring);
-  document.getElementById('Output').value = finalstring;
+  document.getElementById('blueprintOutput').value = finalstring;
   // navigator.clipboard.writeText(finalstring);
 }
 window.encode = encode

@@ -6,223 +6,231 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     >
-    <title>DSP BP Upgrade</title>
+    <title>DSP Blueprint Upgrader</title>
+    <link
+      rel="stylesheet"
+      href="style.css"
+    >
+    <!-- Consider moving CSS to style.css -->
   </head>
-  <style>
-  body {
-    margin: 0;
-    /* Remove default body margins */
-    min-height: 100vh;
-    /* Ensure body covers the entire viewport height */
-    background-image: radial-gradient(circle farthest-corner at 50% 100%,
-        /* Center horizontally, bottom vertically */
-        #391414 0%,
-        #263677 100%);
-    background-repeat: no-repeat;
-    /* Prevent repeating */
-    background-attachment: fixed;
-    /* Keep background fixed during scrolling */
-    color: #f5f5f5;
-  }
-
-  .sprite-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    /* Needed for absolute positioning of the border */
-    border: 3px solid #ccc;
-    padding: 10px;
-    margin: 20px auto;
-    width: fit-content;
-    border-radius: 2em;
-  }
-
-  .sprite {
-    width: 80px;
-    height: 80px;
-    background-image: url('icons-item-recipes.png');
-    background-repeat: no-repeat;
-    margin: 10px;
-    cursor: pointer;
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-    
-  }
-
-  .sprite:hover {
-    opacity: 0.8;
-  }
-
-  .border {
-    position: absolute;
-    transition: left .3s ease;
-    pointer-events: none;
-    z-index: 1;
-    height: 90px;
-    width: 90px;
-    border: 2px solid #FF5;
-    border-radius: 1em;
-  }
-  
-  </style>
-  <script src="ItemEnum.js"></script>
-  <script
-    type="module"
-    src="/index.js"
-  ></script>
-  <script src="md5d.js"></script>
   <body>
-    <label for="Input">Blueprint text</label>
-    <input
-      type="text"
-      id="Input"
-      oninput="Decode()"
-    >
-    <button
-      id="Paste"
-      onmouseup="getClip()"
-    >Paste</button>
-    <button onmouseup="Decode()">Run Decode</button>
-    <div
-      id="c1"
-      class="sprite-container"
-    >
-      <div class="border"></div>
-      <!-- data is 0 indexed -->
+    <header>
+      <h1>DSP Blueprint Upgrader</h1>
+    </header>
+    <main>
+      <section class="blueprint-io">
+        <fieldset>
+          <legend>Blueprint Input</legend>
+          <div class="form-group">
+            <label for="blueprintInput">Blueprint String:</label>
+            <textarea
+              id="blueprintInput"
+              rows="2"
+              placeholder="Paste your blueprint string here..."
+            ></textarea>
+          </div>
+          <div class="button-group">
+            <button id="pasteButton">Paste from Clipboard</button>
+            <button id="decodeButton">Decode Blueprint</button>
+          </div>
+        </fieldset>
+      </section>
+      <section class="upgrade-options">
+        <h2>Upgrade Options</h2>
+        <div class="options-grid">
+          <!-- Sprite Container 1 -->
+          <div class="sprite-selector-group">
+            <p>Conveyor Belts:</p>
+            <div
+              id="c1"
+              class="sprite-container"
+            >
+              <div class="border"></div>
+              <div
+                class="sprite"
+                id="c1-sprite1"
+                data-x="7"
+                data-y="7"
+                title="Conveyor Belt MK.I"
+              ></div>
+              <div
+                class="sprite"
+                id="c1-sprite2"
+                data-x="8"
+                data-y="7"
+                title="Conveyor Belt MK.II"
+              ></div>
+              <div
+                class="sprite"
+                id="c1-sprite3"
+                data-x="9"
+                data-y="7"
+                title="Conveyor Belt MK.III"
+              ></div>
+            </div>
+            <p class="selected-info">
+              <span id="c1-selected-name">None</span>
+            </p>
+          </div>
+          <!-- Sprite Container 2 -->
+          <div class="sprite-selector-group">
+            <p>Sorters:</p>
+            <div
+              id="c2"
+              class="sprite-container"
+            >
+              <div class="border"></div>
+              <div
+                class="sprite"
+                id="c2-sprite1"
+                data-x="10"
+                data-y="7"
+                title="Sorter MK.I"
+              ></div>
+              <div
+                class="sprite"
+                id="c2-sprite2"
+                data-x="11"
+                data-y="7"
+                title="Sorter MK.II"
+              ></div>
+              <div
+                class="sprite"
+                id="c2-sprite3"
+                data-x="12"
+                data-y="7"
+                title="Sorter MK.III"
+              ></div>
+              <div
+                class="sprite"
+                id="c2-sprite4"
+                data-x="13"
+                data-y="7"
+                title="Stacking Sorter"
+              ></div>
+            </div>
+            <p class="selected-info">
+              <span id="c2-selected-name">None</span>
+            </p>
+          </div>
+          <!-- Sprite Container 3 -->
+          <div class="sprite-selector-group">
+            <p>Smelters:</p>
+            <div
+              id="c3"
+              class="sprite-container"
+            >
+              <div class="border"></div>
+              <div
+                class="sprite"
+                id="c3-sprite1"
+                data-x="8"
+                data-y="9"
+                title="Arc Smelter"
+              ></div>
+              <div
+                class="sprite"
+                id="c3-sprite2"
+                data-x="9"
+                data-y="9"
+                title="Plane Smelter"
+              ></div>
+              <div
+                class="sprite"
+                id="c3-sprite3"
+                data-x="10"
+                data-y="9"
+                title="Negentropy Smelter (Modded?)"
+              ></div>
+            </div>
+            <p class="selected-info">
+              <span id="c3-selected-name">None</span>
+            </p>
+          </div>
+          <!-- Sprite Container 4 -->
+          <div class="sprite-selector-group">
+            <p>Assemblers:</p>
+            <div
+              id="c4"
+              class="sprite-container"
+            >
+              <div class="border"></div>
+              <div
+                class="sprite"
+                id="c4-sprite1"
+                data-x="8"
+                data-y="8"
+                title="Assembling Machine Mk.I"
+              ></div>
+              <div
+                class="sprite"
+                id="c4-sprite2"
+                data-x="9"
+                data-y="8"
+                title="Assembling Machine Mk.II"
+              ></div>
+              <div
+                class="sprite"
+                id="c4-sprite3"
+                data-x="10"
+                data-y="8"
+                title="Assembling Machine Mk.III"
+              ></div>
+              <div
+                class="sprite"
+                id="c4-sprite4"
+                data-x="11"
+                data-y="8"
+                title="Re-Composing Assembler (Modded?)"
+              ></div>
+            </div>
+            <p class="selected-info">
+              <span id="c4-selected-name">None</span>
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="blueprint-io">
+        <fieldset>
+          <legend>Blueprint Output</legend>
+          <div class="form-group">
+            <label for="blueprintOutput">Upgraded Blueprint:</label>
+            <textarea
+              id="blueprintOutput"
+              rows="2"
+              readonly
+              placeholder="Upgraded blueprint will appear here..."
+            ></textarea>
+          </div>
+          <div class="button-group">
+            <button id="copyButton">Copy to Clipboard</button>
+          </div>
+        </fieldset>
+      </section>
       <div
-        class="sprite"
-        id="c1-sprite1"
-        data-x="7"
-        data-y="7"
+        id="error-message"
+        class="error-message"
+        style="display: none;"
       ></div>
-      <div
-        class="sprite"
-        id="c1-sprite2"
-        data-x="8"
-        data-y="7"
-      ></div>
-      <div
-        class="sprite"
-        id="c1-sprite3"
-        data-x="9"
-        data-y="7"
-      ></div>
-    </div>
-    <p>
-      Selected Sprite:
-      <span id="c1-selected">None</span>
-    </p>
-    <div
-      id="c2"
-      class="sprite-container"
-    >
-      <div class="border"></div>
-      <!-- data is 0 indexed -->
-      <div
-        class="sprite"
-        id="c2-sprite1"
-        data-x="10"
-        data-y="7"
-      ></div>
-      <div
-        class="sprite"
-        id="c2-sprite2"
-        data-x="11"
-        data-y="7"
-      ></div>
-      <div
-        class="sprite"
-        id="c2-sprite3"
-        data-x="12"
-        data-y="7"
-      ></div>
-      <div
-        class="sprite"
-        id="c2-sprite4"
-        data-x="13"
-        data-y="7"
-      ></div>
-    </div>
-    <p>
-      Selected Sprite:
-      <span id="c2-selected">None</span>
-    </p>
-    <div
-      id="c3"
-      class="sprite-container"
-    >
-      <div class="border"></div>
-      <!-- data is 0 indexed -->
-      <div
-        class="sprite"
-        id="c3-sprite1"
-        data-x="8"
-        data-y="9"
-      ></div>
-      <div
-        class="sprite"
-        id="c3-sprite2"
-        data-x="9"
-        data-y="9"
-      ></div>
-      <div
-        class="sprite"
-        id="c3-sprite3"
-        data-x="10"
-        data-y="9"
-      ></div>
-    </div>
-    <p>
-      Selected Sprite:
-      <span id="c3-selected">None</span>
-    </p>
-    <div
-      id="c4"
-      class="sprite-container"
-    >
-      <div class="border"></div>
-      <!-- data is 0 indexed -->
-      <div
-        class="sprite"
-        id="c4-sprite1"
-        data-x="8"
-        data-y="8"
-      ></div>
-      <div
-        class="sprite"
-        id="c4-sprite2"
-        data-x="9"
-        data-y="8"
-      ></div>
-      <div
-        class="sprite"
-        id="c4-sprite3"
-        data-x="10"
-        data-y="8"
-      ></div>
-      <div
-        class="sprite"
-        id="c4-sprite4"
-        data-x="11"
-        data-y="8"
-      ></div>
-    </div>
-    <p>
-      Selected Sprite:
-      <span id="c4-selected">None</span>
-    </p>
-    <label for="Output">Blueprint Output</label>
-    <input
-      id="Output"
-      type="text"
-      readonly
-    >
-    <button
-      id="Copy"
-      onmouseup="Copy()"
-    >Copy</button>
+      <footer>
+        <a
+          href="https://ko-fi.com/pidog"
+          style="color: #A00;text-decoration: underline;"
+        >Support me on Ko-fi</a> | 
+        <a
+          style="color: #A00;text-decoration: underline;"
+          href="https://github.com/pidogs/DSPBlueprintEditor"
+        >Source Code</a>
+      </footer>
+    </main>
+    <!-- Your JS files -->
+    <script src="ItemEnum.js"></script>
+    <script src="md5d.js"></script>
+    <!-- gzip-js should be loaded before index.js if index.js depends on it synchronously at the top level -->
+    <!-- If using import * as gzip from 'url', then the order in script tags might not matter as much due to module loading -->
+    <script
+      type="module"
+      src="index.js"
+    ></script>
   </body>
-  <script>
-  Output.addEventListener(`focus`, () => Output.select());
-  </script>
 </html>

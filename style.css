@@ -1,0 +1,226 @@
+/* style.css */
+:root {
+  --background-gradient-start: #391414;
+  --background-gradient-end: #263677;
+  --text-color: #f0f0f0;
+  --border-color: #555;
+  --input-bg-color: #2c2c2c;
+  --input-border-color: #444;
+  --button-bg-color: #007bff;
+  --button-hover-bg-color: #0056b3;
+  --button-text-color: #ffffff;
+  --sprite-border-color: #ccc;
+  --sprite-hover-border-color: #FFDD55; /* Brighter yellow for selection */
+  --error-bg-color: #ffdddd;
+  --error-text-color: #d8000c;
+  --error-border-color: #d8000c;
+
+  --sprite-size: 80px;
+  --sprite-margin: 8px;
+  --container-padding: 10px;
+  --container-radius: 1em;
+  --selected-border-size: 3px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background-image: radial-gradient(circle farthest-corner at 50% 100%,
+      var(--background-gradient-start) 0%,
+      var(--background-gradient-end) 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-color);
+  line-height: 1.6;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 0px;
+}
+
+header h1 {
+  font-size: 2.5em;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+section {
+  margin-bottom: 30px;
+}
+
+fieldset {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+legend {
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 0 10px;
+  color: var(--text-color);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+textarea,
+input[type="text"] { /* Target only text input specifically */
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+  font-family: monospace; /* Good for blueprint strings */
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+  margin-top: 15px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--button-hover-bg-color);
+}
+
+.upgrade-options h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 2fr));
+  gap: 20px;
+}
+
+.sprite-selector-group {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 5px 10px;
+  border-radius: var(--container-radius);
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+.sprite-selector-group > p:first-child { /* Target the title paragraph */
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.sprite-container {
+  display: flex;
+  justify-content: center; /* Center sprites within container */
+  align-items: center;
+  position: relative;
+  border: 2px solid var(--sprite-border-color);
+  padding: var(--container-padding);
+  margin: 10px auto; /* Auto margins for horizontal centering if width is fixed */
+  width: fit-content; /* Adjusts to content */
+  border-radius: var(--container-radius);
+  background-color: rgba(0,0,0,0.2);
+}
+
+.sprite {
+  width: var(--sprite-size);
+  height: var(--sprite-size);
+  background-image: url('icons-item-recipes.png');
+  background-repeat: no-repeat;
+  margin: var(--sprite-margin);
+  cursor: pointer;
+  opacity: 0.6; /* Slightly more visible default */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  border: 1px solid transparent; /* for consistent spacing on hover/selection */
+  border-radius: 8px; /* Softer corners for sprites */
+}
+
+.sprite:hover {
+  opacity: 0.85;
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.sprite.selected { /* Add a class for selected state */
+  opacity: 1;
+  /* Border will be handled by the .border element */
+}
+
+
+.border { /* This is the moving selection indicator */
+  position: absolute;
+  top: 50%; /* Center vertically relative to parent */
+  transform: translateY(-50%); /* Adjust for exact centering */
+  transition: left 0.3s ease-out, opacity 0.2s ease-out; /* Smooth transition, added opacity */
+  pointer-events: none;
+  z-index: 1;
+  height: calc(var(--sprite-size) + var(--sprite-margin)); /* Adjust to snugly fit sprite+margin */
+  width: calc(var(--sprite-size) + var(--sprite-margin));
+  border: var(--selected-border-size) solid var(--sprite-hover-border-color);
+  border-radius: 0.75em; /* Match sprite or slightly larger */
+  opacity: 0; /* Hidden by default, shown when a sprite is selected */
+}
+
+.selected-info {
+  margin-top: 10px;
+  font-size: 0.9em;
+  min-height: 1.2em; /* Prevent layout shifts */
+}
+
+.error-message {
+  background-color: var(--error-bg-color);
+  color: var(--error-text-color);
+  border: 1px solid var(--error-border-color);
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
+
+footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.9em;
+  color: #aaa;
+}

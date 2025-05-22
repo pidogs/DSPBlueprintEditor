@@ -95,6 +95,7 @@ const DysonSphereItem = Object.freeze({
   [2303]: 'AssemblingMachineMkI',
   [2304]: 'AssemblingMachineMkII',
   [2305]: 'AssemblingMachineMkIII',
+  [2318]: 'Re-composingAssembler',
   [2315]: 'PlaneSmelter',
   [2201]: 'TeslaTower',
   [2202]: 'WirelessPowerTower',
