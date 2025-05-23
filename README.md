@@ -1,6 +1,6 @@
 # DSP Blueprint Upgrader
 
-https://pidogs.github.io/DSPBlueprintEditor/
+https://pidogs.github.io/DSPBlueprintEditor
 
  - **Important Note:** At present, the upgrader supports only one type of each building per blueprint. This means all buildings of a selected type within the blueprint will be transformed into the one chosen upgrade type. For example, if you select "Conveyor Belt MK.III", all Conveyor Belts in your blueprint will be upgraded to MK.III, regardless of their original tier.
 
