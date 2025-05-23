@@ -34,7 +34,7 @@ function hideError() {
   blueprintInput.style.borderColor = 'var(--input-border-color)';  // Reset
 }
 
-const itemsJsonPath = '/items-en-US.json';
+const itemsJsonPath = './items-en-US.json';
 let itemsData;
 try {
   // 1. Make the web request using fetch
