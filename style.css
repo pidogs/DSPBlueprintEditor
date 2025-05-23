@@ -10,7 +10,7 @@
   --button-hover-bg-color: #0056b3;
   --button-text-color: #ffffff;
   --sprite-border-color: #ccc;
-  --sprite-hover-border-color: #FFDD55; /* Brighter yellow for selection */
+  --sprite-hover-border-color: #00eeff; /* Brighter yellow for selection */
   --error-bg-color: #ffdddd;
   --error-text-color: #d8000c;
   --error-border-color: #d8000c;
@@ -176,27 +176,26 @@ button:hover {
 
 .sprite:hover {
   opacity: 0.85;
-  transform: scale(1.05); /* Slight zoom on hover */
+  transform: scale(1.05);
 }
 
-.sprite.selected { /* Add a class for selected state */
+.sprite.selected { 
   opacity: 1;
-  /* Border will be handled by the .border element */
 }
 
 
-.border { /* This is the moving selection indicator */
+.border {
   position: absolute;
-  top: 50%; /* Center vertically relative to parent */
+  top: 50%;
   transform: translateY(-50%); /* Adjust for exact centering */
   transition: left 0.3s ease-out, opacity 0.2s ease-out; /* Smooth transition, added opacity */
   pointer-events: none;
   z-index: 1;
-  height: calc(var(--sprite-size) + var(--sprite-margin)); /* Adjust to snugly fit sprite+margin */
+  height: calc(var(--sprite-size) + var(--sprite-margin));
   width: calc(var(--sprite-size) + var(--sprite-margin));
   border: var(--selected-border-size) solid var(--sprite-hover-border-color);
-  border-radius: 0.75em; /* Match sprite or slightly larger */
-  opacity: 0; /* Hidden by default, shown when a sprite is selected */
+  border-radius: 0.75em;
+  opacity: 0;
 }
 
 .selected-info {
