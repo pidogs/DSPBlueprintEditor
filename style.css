@@ -10,7 +10,8 @@
   --button-hover-bg-color: #0056b3;
   --button-text-color: #ffffff;
   --sprite-border-color: #ccc;
-  --sprite-hover-border-color: #00eeff; /* Brighter yellow for selection */
+  --sprite-hover-border-color: #00eeff;
+  /* Brighter yellow for selection */
   --error-bg-color: #ffdddd;
   --error-text-color: #d8000c;
   --error-border-color: #d8000c;
@@ -48,7 +49,13 @@ header {
 header h1 {
   font-size: 2.5em;
   color: #fff;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.beta {
+  color: #E22;
+  rotate: 35deg;
+  translate: -35px -20px;
 }
 
 main {
@@ -57,7 +64,7 @@ main {
   padding: 20px;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 section {
@@ -89,14 +96,16 @@ legend {
 }
 
 textarea,
-input[type="text"] { /* Target only text input specifically */
+input[type="text"] {
+  /* Target only text input specifically */
   width: 100%;
   padding: 10px;
   border-radius: 4px;
   border: 1px solid var(--input-border-color);
   background-color: var(--input-bg-color);
   color: var(--text-color);
-  font-family: monospace; /* Good for blueprint strings */
+  font-family: monospace;
+  /* Good for blueprint strings */
 }
 
 textarea {
@@ -106,7 +115,8 @@ textarea {
 
 .button-group {
   display: flex;
-  gap: 10px; /* Space between buttons */
+  gap: 10px;
+  /* Space between buttons */
   margin-top: 15px;
 }
 
@@ -143,22 +153,27 @@ button:hover {
   border: 1px solid var(--border-color);
   text-align: center;
 }
-.sprite-selector-group > p:first-child { /* Target the title paragraph */
+
+.sprite-selector-group>p:first-child {
+  /* Target the title paragraph */
   font-weight: bold;
   margin-bottom: 10px;
 }
 
 .sprite-container {
   display: flex;
-  justify-content: center; /* Center sprites within container */
+  justify-content: center;
+  /* Center sprites within container */
   align-items: center;
   position: relative;
   border: 2px solid var(--sprite-border-color);
   padding: var(--container-padding);
-  margin: 10px auto; /* Auto margins for horizontal centering if width is fixed */
-  width: fit-content; /* Adjusts to content */
+  margin: 10px auto;
+  /* Auto margins for horizontal centering if width is fixed */
+  width: fit-content;
+  /* Adjusts to content */
   border-radius: var(--container-radius);
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .sprite {
@@ -168,10 +183,13 @@ button:hover {
   background-repeat: no-repeat;
   margin: var(--sprite-margin);
   cursor: pointer;
-  opacity: 0.6; /* Slightly more visible default */
+  opacity: 0.6;
+  /* Slightly more visible default */
   transition: opacity 0.2s ease, transform 0.2s ease;
-  border: 1px solid transparent; /* for consistent spacing on hover/selection */
-  border-radius: 8px; /* Softer corners for sprites */
+  border: 1px solid transparent;
+  /* for consistent spacing on hover/selection */
+  border-radius: 8px;
+  /* Softer corners for sprites */
 }
 
 .sprite:hover {
@@ -179,7 +197,7 @@ button:hover {
   transform: scale(1.05);
 }
 
-.sprite.selected { 
+.sprite.selected {
   opacity: 1;
 }
 
@@ -187,8 +205,10 @@ button:hover {
 .border {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%); /* Adjust for exact centering */
-  transition: left 0.3s ease-out, opacity 0.2s ease-out; /* Smooth transition, added opacity */
+  transform: translateY(-50%);
+  /* Adjust for exact centering */
+  transition: left 0.3s ease-out, opacity 0.2s ease-out;
+  /* Smooth transition, added opacity */
   pointer-events: none;
   z-index: 1;
   height: calc(var(--sprite-size) + var(--sprite-margin));
@@ -201,7 +221,8 @@ button:hover {
 .selected-info {
   margin-top: 10px;
   font-size: 0.9em;
-  min-height: 1.2em; /* Prevent layout shifts */
+  min-height: 1.2em;
+  /* Prevent layout shifts */
 }
 
 .error-message {

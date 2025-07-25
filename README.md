@@ -44,8 +44,8 @@ The project interacts with a specific binary format for Dyson Sphere Program blu
 |                            | 24-27                                  | uint32    | primary_area_index    | Index of the primary area in the blueprint.                                               |
 |                            | 28                                     | uint8     | area_count            | Number of BlueprintArea structures that follow.                                           |
 | **Blueprint Area**         | (Repeats area_count times)             |           |                       | Defines a rectangular area within the blueprint.                                          |
-|                            | 0                                      | uint8      | index                 | Unique index for this area.                                                               |
-|                            | 1                                      | uint8      | parent_index          | Index of the parent area (e.g., -1 or 0xFF for no parent).                                |
+|                            | 0                                      | uint8     | index                 | Unique index for this area.                                                               |
+|                            | 1                                      | uint8     | parent_index          | Index of the parent area (e.g., -1 or 0xFF for no parent).                                |
 |                            | 2-3                                    | uint16    | tropic_anchor         | Anchor point related to planetary tropics/grid.                                           |
 |                            | 4-5                                    | uint16    | area_segments         | Number of segments (grid units) in this area.                                             |
 |                            | 6-7                                    | uint16    | anchor_local_offset_x | X offset of the area's anchor within its parent or global space.                          |
@@ -55,9 +55,9 @@ The project interacts with a specific binary format for Dyson Sphere Program blu
 | **Building Header**        |                                        |           |                       | Header for the main building/entity data that follows.                                    |
 |                            | 0-3                                    | uint32    | building_count        | **Speculative:** Total number of building entries/segments in the blueprint.              |
 | **Building Data Segments** | (Variable Length)                      |           |                       | Contains data for individual buildings/entities.                                          |
-|                            | 0-3                                    | uint32     | Index                 | Unique identifier for the building/entity entry.                                          |
+|                            | 0-3                                    | uint32    | Index                 | Unique identifier for the building/entity entry.                                          |
 |                            | 4-5                                    | uint16    | BuildingID            | ID of the building/item type (e.g., Sorter, Assembler).                                   |
-|                            | 6-7                                    | uint32    | ModelIndex            | Index of the object's visual model/variant.                                               |
+|                            | 6-7                                    | uint16    | ModelIndex            | Index of the object's visual model/variant.                                               |
 |                            | 8                                      | uint8     | UnknownByte           | An unknown byte, often observed as 0x00.                                                  |
 |                            | 9-12                                   | float32   | x                     | X-coordinate of the building.                                                             |
 |                            | 13-16                                  | float32   | y                     | Y-coordinate of the building.                                                             |

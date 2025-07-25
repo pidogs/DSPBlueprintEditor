@@ -1,3 +1,51 @@
+const upgradePaths = {
+  // Conveyor Belts (example: if any belt is found, offer all belt upgrades)
+  2001: { title: "Conveyor Belts:", upgrades: [2001, 2002, 2003] },
+  2002: { title: "Conveyor Belts:", upgrades: [2001, 2002, 2003] },
+  2003: { title: "Conveyor Belts:", upgrades: [2001, 2002, 2003] },
+  // Sorters
+  2011: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
+  2012: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
+  2013: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
+  2014: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
+  // Smelters
+  2302: { title: "Smelters:", upgrades: [2302, 2315, 2319] }, // Assuming 2319 is Negentropy
+  2315: { title: "Smelters:", upgrades: [2302, 2315, 2319] },
+  2319: { title: "Smelters:", upgrades: [2302, 2315, 2319] },
+  // Assemblers
+  2303: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] }, // Assuming 2318 Recomposer
+  2304: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] },
+  2305: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] },
+  2318: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] },
+};
+
+//todo remove
+const groupSpriteDetails = { // Defines sprite sheet coordinates for each group
+  "Conveyor Belts:": { baseX: 7, y: 7 },
+  "Sorters:":        { baseX: 10, y: 7 },
+  "Smelters:":       { baseX: 8, y: 9 },
+  "Assemblers:":     { baseX: 8, y: 8 }
+  // Add more groups here if they follow the same UI pattern
+};
+
+const spriteLayoutData = [
+  // Conveyor Belts (corresponds to buildingsWanted[0])
+  [ { dataX: 7, dataY: 7 }, { dataX: 8, dataY: 7 }, { dataX: 9, dataY: 7 } ],
+  // Sorters (corresponds to buildingsWanted[1])
+  [ { dataX: 10, dataY: 7 }, { dataX: 11, dataY: 7 }, { dataX: 12, dataY: 7 }, { dataX: 13, dataY: 7 } ],
+  // Smelters (corresponds to buildingsWanted[2])
+  [ { dataX: 8, dataY: 9 }, { dataX: 9, dataY: 9 }, { dataX: 10, dataY: 9 } ],
+  // Assemblers (corresponds to buildingsWanted[3])
+  [ { dataX: 8, dataY: 8 }, { dataX: 9, dataY: 8 }, { dataX: 10, dataY: 8 }, { dataX: 11, dataY: 8 } ]
+];
+
+const buildingsWanted = [
+  [2001, 2002, 2003],        // Conveyor Belts
+  [2011, 2012, 2013, 2014],  // Sorters
+  [2302, 2315, 2319],        // Smelters
+  [2303, 2304, 2305, 2318]   // Assemblers
+];
+
 const DysonSphereItem = Object.freeze({
   [-1]: 'Lava',
   [16]: 'PlasmaRefining',
