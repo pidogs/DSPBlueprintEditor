@@ -15,9 +15,7 @@
   </head>
   <body>
     <header>
-      <span
-        style="display: flex; justify-content: center;"
-      >
+      <span style="display: flex; justify-content: center;">
         <h1>
           DSP Blueprint Upgrader
         </h1>
@@ -83,8 +81,7 @@
     <!-- Your JS files -->
     <script src="ItemEnum.js"></script>
     <script src="md5d.js"></script>
-    <!-- gzip-js should be loaded before index.js if index.js depends on it synchronously at the top level -->
-    <!-- If using import * as gzip from 'url', then the order in script tags might not matter as much due to module loading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script
       type="module"
       src="index.js"

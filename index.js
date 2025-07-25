@@ -349,11 +349,11 @@ function Decode() {
     // document.getElementById('output').innerHTML = md5Hash;
     //     bp_string.split(',')[11].split('"')[2].toLowerCase();
     base64data = crypt.base64ToBytes(encodedData)
-    let decodedData = gzip.unzip(base64data);
+    let decodedData = pako.ungzip(base64data);
 
     let hexList = byteArrayToHexString(decodedData)
     tempCompare = hexList
-    // console.log(hexList)
+    console.log(hexList)
     // console.log(hexList.split('9bffffff'))
     let hexsplit = hexList.split('9bffffff')
     // window.decodedData = hexsplit
@@ -439,69 +439,80 @@ function encode() {
     return;
   }
   
-  console.log(dynamicSelectionGroups)
-  console.log(hexsplit)
+  console.log(dynamicSelectionGroups);
+  console.log(hexsplit);
   hideError();
-  // let tempHexSegments = [...window.decodedData];
+
   let tempHexSegments = [...hexsplit];
   for (const groupTitle in dynamicSelectionGroups) {
     const group = dynamicSelectionGroups[groupTitle];
-    const selectedSpriteOneBasedIndex =
-        group.selectorInstance.getSelectedIndex();
-    const selectedItemActualIndex =
-        selectedSpriteOneBasedIndex - 1;  // Convert to 0-based
+    const selectedSpriteOneBasedIndex = group.selectorInstance.getSelectedIndex();
+
+    // Handle case where nothing is selected (getSelectedIndex might return -1)
+    if (selectedSpriteOneBasedIndex <= 0) {
+      console.warn(`No selection for group ${groupTitle}. Skipping.`);
+      showError(`Error: No selection made for ${groupTitle}.`);
+      continue;
+    }
+
+    const selectedItemActualIndex = selectedSpriteOneBasedIndex - 1;
     const buildingNumToEncode = group.itemIds[selectedItemActualIndex];
 
-
     if (itemsData[buildingNumToEncode] === undefined) {
-      console.warn(`Item data for ID ${buildingNumToEncode} (group ${
-          groupTitle}) not found. Skipping.`);
+      console.warn(`Item data for ID ${buildingNumToEncode} (group ${groupTitle}) not found. Skipping.`);
       showError(`Error: Data for item ID ${buildingNumToEncode} is missing.`);
       continue;
     }
-    const modelNumToEncode = itemsData[buildingNumToEncode].modelIndex
-    for (const hexSplitIndex of group.hexIndices) {
-      // console.log("index: "+hexSplitIndex)
-      let segmentHex = tempHexSegments[hexSplitIndex];
-      // console.log(segmentHex)
+    const modelNumToEncode = itemsData[buildingNumToEncode].modelIndex;
 
-      let buildingHexLE =
-          (buildingNumToEncode & 0xFF).toString(16).padStart(2, '0') +
-          ((buildingNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
-      segmentHex =
-          segmentHex.slice(0, 8) + buildingHexLE + segmentHex.slice(12);
+    for (const hexSplitIndex of group.hexIndices) {
+      let segmentHex = tempHexSegments[hexSplitIndex];
+      
+      let buildingHexLE = (buildingNumToEncode & 0xFF).toString(16).padStart(2, '0') +
+                        ((buildingNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
+      segmentHex = segmentHex.slice(0, 8) + buildingHexLE + segmentHex.slice(12);
 
       let modelHexLE = (modelNumToEncode & 0xFF).toString(16).padStart(2, '0') +
-          ((modelNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
+                     ((modelNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
       segmentHex = segmentHex.slice(0, 12) + modelHexLE + segmentHex.slice(16);
-      // console.log(segmentHex)
+      
       tempHexSegments[hexSplitIndex] = segmentHex;
     }
   }
 
   const finalHexString = tempHexSegments.join('9bffffff');
-  // console.log(finalHexString)
-  console.log(findStringDifferences(tempCompare, finalHexString))
-  console.log(
-      'tempCompare size:', (finalHexString.length / 2 / 1024).toFixed(4), 'KB');
+  console.log(findStringDifferences(tempCompare, finalHexString));
+  console.log('tempCompare size:', (finalHexString.length / 2 / 1024).toFixed(4), 'KB');
+  
   const byteArrayForGzip = hexStringToArray(finalHexString);
-  let gzipOptions = {
-    timestamp: new Date(0),
-    level: 6,
-    os: 11,
-    chunkSize: 0 // does nothing because chunkSize is not in gzip-js.js
+
+  // --- START OF CRITICAL CHANGE ---
+  // Use pako with options to match .NET GZipStream
+  const pakoOptions = {
+    level: 6,       // Standard compression level
+    header: {
+      mtime: 0,     // Set Modification Time to 0 to match original header
+      os: 11        // Set OS to 11 (0x0B) for Windows/NTFS to match original
+    }
   };
 
-  let zippedData = gzip.zip(byteArrayForGzip, gzipOptions);
-  // zippedData[9] = 11;  // set os to ntfs so I can just import the files
-  // insted of supplying them my self
+  // Use pako.gzip to compress the data
+  let zippedData = pako.gzip(byteArrayForGzip, pakoOptions);
+  // --- END OF CRITICAL CHANGE ---
+
+  // NOTE: crypt.bytesToBase64 must be defined elsewhere in your project
+  // This assumes it correctly converts a Uint8Array to a Base64 string.
   let encodedBlueprintPart = predata + '"' + crypt.bytesToBase64(zippedData);
-  console.log('encodedBlueprintPart', encodedBlueprintPart)
+  console.log('encodedBlueprintPart', encodedBlueprintPart);
+  
+  // NOTE: md5 and stringToBytes must be defined elsewhere in your project
   let newHash = md5(new stringToBytes(encodedBlueprintPart), true, true);
   let finalBlueprintString = encodedBlueprintPart + '"' + newHash.toUpperCase();
+  
   document.getElementById('blueprintOutput').value = finalBlueprintString;
 }
-window.encode = encode
+// Make sure this is globally available for your HTML button
+window.encode = encode;
 
 function findStringDifferences(str1, str2) {
   const maxLength = Math.max(str1.length, str2.length);
@@ -520,14 +531,17 @@ function findStringDifferences(str1, str2) {
 
 
 function byteArrayToHexString(byteArray) {
-  if (!byteArray || !Array.isArray(byteArray)) {
-    console.error('Input is not a valid array.');
+  // Check only for null/undefined. This will now accept a Uint8Array.
+  if (!byteArray) {
+    console.error('Input byte array is null or undefined.');
     return '';
   }
-  return byteArray
+
+  // Use Array.from() to safely convert any array-like object (including Uint8Array)
+  // into a standard array that we can map over to create hex strings.
+  return Array.from(byteArray)
       .map(byte => {
-        // Ensure the byte is within the 0-255 range and get its hex
-        // representation
+        // Ensure the byte is within the 0-255 range and get its hex representation
         const hex = (byte & 0xFF).toString(16);
         // Pad with a leading zero if the hex representation is a single digit
         return hex.length === 1 ? '0' + hex : hex;
@@ -551,7 +565,7 @@ function hexStringToArray(hexString) {
     int8Array.push(unsignedByteValue);
   }
 
-  return int8Array;
+  return new Uint8Array(int8Array);;
 }
 
 
@@ -935,7 +949,3 @@ function decodeBlueprintArea(view, initialOffset) {
 
   return {area: area, bytesRead: bytesRead};
 }
-
-
-
-import * as gzip from './js/gzip-js.js';
