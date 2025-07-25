@@ -312,7 +312,9 @@ async function Copy() {
 }
 window.Copy = Copy;
 
-let tempCompare = "";
+let tempCompare = '';
+let base64data = '';
+let lastDecodedState = {};
 
 function Decode() {
   var predata;
@@ -328,9 +330,9 @@ function Decode() {
   try {
     const inputIndex = bp_string.lastIndexOf('"');
     const hashed_data = bp_string.substring(0, inputIndex);
-    console.log("hashed_data",hashed_data)
+    console.log('hashed_data', hashed_data)
     let encodedData = bp_string.split('"')[1];
-    console.log("encodedData",encodedData)
+    console.log('encodedData', encodedData)
     // console.log(bp_string)
     predata = bp_string.substring(0, bp_string.indexOf('"'));
     let givenHash = bp_string.substring(bp_string.lastIndexOf('"') + 1);
@@ -346,7 +348,8 @@ function Decode() {
     }
     // document.getElementById('output').innerHTML = md5Hash;
     //     bp_string.split(',')[11].split('"')[2].toLowerCase();
-    let decodedData = gzip.unzip(crypt.base64ToBytes(encodedData));
+    base64data = crypt.base64ToBytes(encodedData)
+    let decodedData = gzip.unzip(base64data);
 
     let hexList = byteArrayToHexString(decodedData)
     tempCompare = hexList
@@ -413,7 +416,13 @@ function Decode() {
             spriteIndexToSelect + 1);
       }
     }
-    encode(predata,hexsplit,dynamicSelectionGroups);
+    // Store state for subsequent calls to encode()
+    lastDecodedState = {
+      predata,
+      hexsplit,
+      dynamicSelectionGroups
+    };
+    encode();
   } catch (e) {
     console.error('Error during Decode:', e);
     showError(`Decoding error: ${e.message || e}`);
@@ -422,12 +431,17 @@ function Decode() {
 }
 window.Decode = Decode
 
-function encode(predata,hexsplit,dynamicSelectionGroups) {
-  hideError();
-  if (Object.keys(dynamicSelectionGroups).length === 0) {
-    return
+function encode() {
+  const { predata, hexsplit, dynamicSelectionGroups } = lastDecodedState;
+
+  if (!predata || !hexsplit || !dynamicSelectionGroups) {
+    console.warn('encode called before successful decode. Aborting.');
+    return;
   }
+  
   console.log(dynamicSelectionGroups)
+  console.log(hexsplit)
+  hideError();
   // let tempHexSegments = [...window.decodedData];
   let tempHexSegments = [...hexsplit];
   for (const groupTitle in dynamicSelectionGroups) {
@@ -467,74 +481,25 @@ function encode(predata,hexsplit,dynamicSelectionGroups) {
 
   const finalHexString = tempHexSegments.join('9bffffff');
   // console.log(finalHexString)
-  console.log(findStringDifferences(tempCompare,finalHexString))
-  
+  console.log(findStringDifferences(tempCompare, finalHexString))
+  console.log(
+      'tempCompare size:', (finalHexString.length / 2 / 1024).toFixed(4), 'KB');
   const byteArrayForGzip = hexStringToArray(finalHexString);
   let gzipOptions = {
     timestamp: new Date(0),
-    level: 6
+    level: 6,
+    os: 11,
+    chunkSize: 0 // does nothing because chunkSize is not in gzip-js.js
   };
 
   let zippedData = gzip.zip(byteArrayForGzip, gzipOptions);
-  zippedData[9] = 11;  // set os to ntfs so I can just import the files insted
-                       // of supplying them my self
+  // zippedData[9] = 11;  // set os to ntfs so I can just import the files
+  // insted of supplying them my self
   let encodedBlueprintPart = predata + '"' + crypt.bytesToBase64(zippedData);
-  console.log("encodedBlueprintPart",encodedBlueprintPart)
+  console.log('encodedBlueprintPart', encodedBlueprintPart)
   let newHash = md5(new stringToBytes(encodedBlueprintPart), true, true);
   let finalBlueprintString = encodedBlueprintPart + '"' + newHash.toUpperCase();
   document.getElementById('blueprintOutput').value = finalBlueprintString;
-
-
-
-  //============================
-  // let hexString = ''
-  // let options = {
-  //   timestamp: new Date(0),
-  // };
-  // let tempData = decodedData
-  // for (const type in buildingindexes) {
-  //   for (const index in buildingindexes[type]) {
-  //     // get the hex string associated wiht a type of building for change
-  //     let data = decodedData[buildingindexes[type][index]];
-  //     let buildingNum =
-  //         buildingsWanted[type][selectionArr[type].getSelectedIndex() - 1];
-  //     // Extract the least significant byte
-  //     let hex = '';
-  //     // const byte = buildingNum & 0xFF;
-  //     // hex += byte.toString(16).padStart(2, '0');
-  //     hex += (buildingNum & 0xFF).toString(16).padStart(2, '0');
-  //     let tmp = buildingNum >> 8
-  //     hex += (tmp & 0xFF).toString(16).padStart(2, '0');
-  //     console.log(data)
-  //     data = data.slice(0, 8) + hex + data.slice(12)
-  //     hex = '';
-  //     // Convert byte to a 2-character hex string, padding with '0' if needed
-  //     // if ("d2" == data.slice(8, 10)) {
-  //     // let model = 52
-  //     let model = itemsData[buildingNum].modelIndex
-  //     hex += (model & 0xFF).toString(16).padStart(2, '0');
-  //     model = model >> 8
-  //     hex += (model & 0xFF).toString(16).padStart(2, '0');
-  //     data = data.slice(0, 12) + hex + data.slice(16);
-  //     console.log(data)
-  //     tempData[buildingindexes[type][index]] = data
-  //     tempData[buildingindexes[type][index]] = data
-  //   }
-  // }
-  // hexString = tempData.join(`9bffffff`)
-  // // console.log(hexString)
-  // let intArray = hexStringToArray(hexString)
-
-  // let partA = gzip.zip(intArray, options);
-  // partA[9] = 11;  // set os to ntfs so I can just import the files insted of
-  //                 // supplying them my self
-  // let encoded = predata + '"' + crypt.bytesToBase64(partA);
-  // // console.log(encoded);
-  // let newHash = md5(encoded, true, true);
-  // let finalstring = encoded + '"' + newHash.toUpperCase();
-  // console.log(finalstring);
-  // document.getElementById('blueprintOutput').value = finalstring;
-  // // navigator.clipboard.writeText(finalstring);
 }
 window.encode = encode
 
@@ -547,7 +512,7 @@ function findStringDifferences(str1, str2) {
       differences.push(`Index ${i}: '${str1[i] || ' '} vs '${str2[i] || ' '}'`);
     }
   }
-  if(differences.length == 0){
+  if (differences.length == 0) {
     return -1
   }
   return differences;
@@ -973,5 +938,4 @@ function decodeBlueprintArea(view, initialOffset) {
 
 
 
-import * as gzip from 'https://cdn.skypack.dev/gzip-js';
-// import * as gzip from './gzip-js.in.js';
+import * as gzip from './js/gzip-js.js';
