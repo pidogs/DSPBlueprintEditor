@@ -2,11 +2,7 @@ const spriteWidth = 80;
 const spriteHeight = 80;
 const delimiterArray = [155, 255, 255, 255];  // 0x9bffffff
 
-// let OGString;
-// let decodedData;
-// let predata = '';
 const optionsGrid = document.querySelector('.options-grid');
-// let dynamicSelectionGroups = {};
 
 const blueprintInput = document.getElementById('blueprintInput');
 const pasteButton = document.getElementById('pasteButton');
@@ -15,19 +11,26 @@ const blueprintOutput = document.getElementById('blueprintOutput');
 const copyButton = document.getElementById('copyButton');
 const errorMessageDiv = document.getElementById('error-message');
 
-pasteButton.addEventListener(
-    'click', getClip);  // Assuming getClip is global or imported
-decodeButton.addEventListener(
-    'click', Decode);  // Assuming Decode is global or imported
-copyButton.addEventListener(
-    'click', Copy);  // Assuming Copy is global or imported
+pasteButton.addEventListener('click', getClip);
+decodeButton.addEventListener('click', Decode);
+copyButton.addEventListener('click', Copy);
 
+/**
+ * Displays an error message to the user and highlights the blueprint input field.
+ *
+ * @param {string} message - The error message to display.
+ */
 function showError(message) {
   errorMessageDiv.textContent = message;
   errorMessageDiv.style.display = 'block';
   blueprintInput.style.borderColor = 'var(--error-border-color)';  // Visual cue
 }
 
+/**
+ * Hides the error message and resets the input border color to its default value.
+ * Clears the error message text, hides the error message element,
+ * and restores the blueprint input's border color.
+ */
 function hideError() {
   errorMessageDiv.textContent = '';
   errorMessageDiv.style.display = 'none';
@@ -37,23 +40,29 @@ function hideError() {
 const itemsJsonPath = './items-en-US.json';
 let itemsData;
 try {
-  // 1. Make the web request using fetch
   const response = await fetch(itemsJsonPath);
 
-  // 2. Check if the request was successful (status code 200-299)
   if (!response.ok) {
-    // If not successful, throw an error with the status
     throw new Error(
         `HTTP error! status: ${response.status} - ${response.statusText}`);
   }
   itemsData = await response.json();
 } catch (error) {
-  // Handle any errors that occurred during fetch or JSON parsing
   console.error('Could not load items data:', error);
 }
 
 
 
+/**
+ * Determines if the given current version is newer than or equal to the reference version.
+ *
+ * Versions are compared numerically by splitting on '.' and comparing each part in order.
+ * If a part is missing, it is treated as 0.
+ *
+ * @param {string} currentVersion - The version string to compare (e.g., "0.10.31.22242").
+ * @param {string} [referenceVersion='0.10.30.22241'] - The reference version string to compare against.
+ * @returns {boolean} Returns true if currentVersion is newer than or equal to referenceVersion, false otherwise.
+ */
 function isNewerVersion(currentVersion, referenceVersion = '0.10.30.22241') {
   const currentParts = currentVersion.split('.').map(Number);
   const referenceParts = referenceVersion.split('.').map(Number);
@@ -63,19 +72,35 @@ function isNewerVersion(currentVersion, referenceVersion = '0.10.30.22241') {
     const currentPart = currentParts[i] || 0;
     const referencePart = referenceParts[i] || 0;
 
-    if (currentPart > referencePart) {
-      return true;  // Current version is newer
+    if (currentPart > referencePart) {  // Current version is newer
+      return true;
     }
-    if (currentPart < referencePart) {
-      return false;  // Current version is older
+    if (currentPart < referencePart) {  // Current version is older
+      return false;
     }
-    // If parts are equal, continue to the next part
   }
 
-  return true;  // Versions are equal (so not newer)
+  return true;
 }
 
-function setupSpriteContainer(containerElement, groupItemIds, groupUniqueId) {
+/**
+ * Sets up a sprite container with selection, click handling, and visual feedback.
+ * Allows selecting sprites, disabling/enabling clicks, and updating selection display.
+ *
+ * @param {HTMLElement} containerElement - The DOM element containing the sprite group.
+ * @param {string[]} groupItemIds - Array of item IDs corresponding to each sprite in the group.
+ * @param {string|number} groupUniqueId - Unique identifier for the group, used for DOM element IDs.
+ * @param {string} genericGroupTitle - Title or type of the group, used for global update logic.
+ * @returns {{
+ *   deselectAll: function(): void,
+ *   selectSprite: function(string|number): void,
+ *   enableClicks: function(): void,
+ *   disableClicks: function(): void,
+ *   getSelectedIndex: function(): number
+ * }} An object exposing methods to control sprite selection and interaction.
+ */
+function setupSpriteContainer(
+    containerElement, groupItemIds, groupUniqueId, genericGroupTitle) {
   let selectedSprite = null;
   let selectedIndex = -1;
   let clickEnabled = false;
@@ -93,12 +118,13 @@ function setupSpriteContainer(containerElement, groupItemIds, groupUniqueId) {
         `-${x * spriteWidth}px -${y * spriteHeight}px`;
   }
 
+
   function disableSpriteClicks() {
     clickEnabled = false;
     sprites.forEach(sprite => {
-      sprite.style.pointerEvents = 'none';  // Prevent clicks
-      sprite.style.cursor = 'default';      // Change cursor
-      sprite.style.opacity = 0.5;           // Ensure all are dimmed
+      sprite.style.pointerEvents = 'none';
+      sprite.style.cursor = 'default';
+      sprite.style.opacity = 0.5;
     });
     // Hide the border if it's visible
     if (border) {
@@ -115,11 +141,9 @@ function setupSpriteContainer(containerElement, groupItemIds, groupUniqueId) {
   function enableSpriteClicks() {
     clickEnabled = true;
     sprites.forEach(sprite => {
-      sprite.style.pointerEvents = 'auto';  // Re-enable clicks
-      sprite.style.cursor = 'pointer';      // Restore pointer cursor
+      sprite.style.pointerEvents = 'auto';
+      sprite.style.cursor = 'pointer';
     });
-    // The selectSprite function will handle showing the border and correct
-    // opacity
   }
 
   function deselectAll() {
@@ -148,34 +172,26 @@ function setupSpriteContainer(containerElement, groupItemIds, groupUniqueId) {
     enableSpriteClicks();
     const fullSpriteId = `sprite-${groupUniqueId}-${numericalIdSuffix}`;
     const newSelectedSprite = document.getElementById(fullSpriteId);
-
     if (!newSelectedSprite) return;
-
     if (border) {
       border.style.opacity = 1;
     }
-
     if (selectedSprite) {
       selectedSprite.style.opacity = 0.5;
     }
-
     newSelectedSprite.style.opacity = 1;
     selectedSprite = newSelectedSprite;
     selectedIndex = parseInt(numericalIdSuffix);
-
     let spriteDOMElements = Array.from(sprites);
     let visualIndex = spriteDOMElements.indexOf(newSelectedSprite);
     if (visualIndex !== -1 && border) {
       border.style.left = `${visualIndex * (spriteWidth + 16) + 15}px`;
     }
-
     if (selectedSpan && itemsData && groupItemIds[selectedIndex - 1] &&
         itemsData[groupItemIds[selectedIndex - 1]]) {
       selectedSpan.textContent =
           itemsData[groupItemIds[selectedIndex - 1]].name;
     } else if (selectedSpan) {
-      // This case should ideally not happen if itemsData and groupItemIds are
-      // correct
       selectedSpan.textContent = 'Error';
       console.warn(
           'Could not set selected item name for:', groupUniqueId, selectedIndex,
@@ -188,14 +204,36 @@ function setupSpriteContainer(containerElement, groupItemIds, groupUniqueId) {
     return selectedIndex;
   }
 
+  function deselectAll() {
+    disableSpriteClicks();
+    if (border) {
+      border.style.opacity = 0;
+    }
+    sprites.forEach(sprite => {
+      sprite.style.opacity = 0.5;
+    });
+    if (selectedSpan) {
+      selectedSpan.textContent = 'None';
+    }
+    selectedSprite = null;
+    selectedIndex = -1;
+  }
 
 
   sprites.forEach((sprite) => {
     updateSpritePosition(sprite);
-    sprite.addEventListener('click', () => {
+    sprite.addEventListener('click', (event) => {  // Added event parameter
       const numericalSuffix = sprite.id.split('-').pop();
-      selectSprite(numericalSuffix);
-      if (typeof encode === 'function') encode();
+      const selectedItemId = groupItemIds[parseInt(numericalSuffix) - 1];
+
+      if (event.shiftKey) {
+        // If shift is pressed, call the global update function
+        updateAllGroupsOfType(genericGroupTitle, selectedItemId);
+      } else {
+        // Otherwise, perform a normal click action
+        selectSprite(numericalSuffix);
+        if (typeof encode === 'function') encode();
+      }
     });
   });
 
@@ -219,38 +257,47 @@ function setupSpriteContainer(containerElement, groupItemIds, groupUniqueId) {
   };
 }
 
-// Set up each container
-// let c1 = setupSpriteContainer('c1');
-// let c2 = setupSpriteContainer('c2');
-// let c3 = setupSpriteContainer('c3');
-// let c4 = setupSpriteContainer('c4');
-// const selectionArr = [c1, c2, c3, c4];
-
-// c1.deselectAll();
-// c2.selectSprite('2')
-
-
+/**
+ * Generates an HTML element representing a group of sprite selectors.
+ *
+ * @param {string} groupTitle - The title of the sprite selector group.
+ * @param {Array<string>} itemIds - Array of item IDs to display as sprites.
+ * @param {Array<Object>} spriteCoordinates - Array of coordinate objects for each sprite.
+ *        Each object should have `dataX` and `dataY` properties.
+ * @param {string|number} groupUniqueId - Unique identifier for the group, used for element IDs.
+ * @returns {HTMLElement} The root HTML element of the sprite selector group.
+ */
 function generateSpriteSelectorGroupHTML(
-    groupTitle, itemIds, baseX, spriteY, groupUniqueId) {
+    groupTitle, itemIds, spriteCoordinates, groupUniqueId) {
   let spritesHtml = '';
+  // The loop now uses both the item ID and its index to get the corresponding
+  // sprite data
   itemIds.forEach((itemId, index) => {
     const itemName =
         itemsData[itemId] ? itemsData[itemId].name : 'Unknown Item';
-    const spriteId = `sprite-${groupUniqueId}-${
-        index + 1}`;  // e.g., sprite-conveyor-belts-1
+    const spriteId = `sprite-${groupUniqueId}-${index + 1}`;
+
+    // Get the specific coordinates for this sprite from the passed array
+    const coords = spriteCoordinates[index];
+    if (!coords) {
+      console.warn(`Missing sprite coordinate for item at index ${
+          index} in group ${groupTitle}`);
+      return;  // Skip this sprite if coordinates are missing
+    }
+
     spritesHtml += `
       <div
         class="sprite"
         id="${spriteId}"
-        data-x="${baseX + index}"
-        data-y="${spriteY}"
+        data-x="${coords.dataX}"
+        data-y="${coords.dataY}"
         title="${itemName}"
       ></div>`;
   });
 
   const groupHtml = `
     <div class="sprite-selector-group" id="group-${groupUniqueId}">
-      <p>${groupTitle}:</p>
+      <p>Convert: ${groupTitle}</p>
       <div id="sprite-container-${groupUniqueId}" class="sprite-container">
         <div class="border"></div>
         ${spritesHtml}
@@ -265,6 +312,12 @@ function generateSpriteSelectorGroupHTML(
   return tempDiv.firstChild;
 }
 
+/**
+ * Converts C# ticks (100-nanosecond intervals since 0001-01-01) to milliseconds since the Unix epoch (1970-01-01).
+ *
+ * @param {number} ticks - The number of C# ticks to convert.
+ * @returns {number} The corresponding time in milliseconds since the Unix epoch.
+ */
 function csharpTicksToJSDate(ticks) {
   // Ticks per millisecond
   const ticksPerMillisecond = 10000;
@@ -277,6 +330,15 @@ function csharpTicksToJSDate(ticks) {
   return milliseconds;
 }
 
+/**
+ * Asynchronously reads text from the user's clipboard and sets it as the value of the
+ * input element with the ID 'blueprintInput'. If successful, attempts to call the global
+ * Decode function. Handles errors and missing elements gracefully.
+ *
+ * @async
+ * @function getClip
+ * @returns {Promise<void>} Resolves when clipboard text is read and processed, or rejects on error.
+ */
 async function getClip() {
   const blueprintInput = document.getElementById('blueprintInput');
   if (!blueprintInput) {
@@ -298,9 +360,6 @@ async function getClip() {
     }
   } catch (err) {
     console.error('Failed to read clipboard contents: ', err);
-    // Optionally, inform the user that paste failed
-    // e.g., showError("Failed to paste from clipboard. Please check
-    // permissions.");
   }
 }
 
@@ -316,6 +375,22 @@ let tempCompare = '';
 let base64data = '';
 let lastDecodedState = {};
 
+/**
+ * Decodes a blueprint input string, validates its hash, decompresses and parses the data,
+ * and dynamically generates sprite selector groups for upgradeable buildings.
+ * 
+ * The function performs the following steps:
+ * 1. Clears the options grid and hides any previous errors.
+ * 2. Retrieves and validates the blueprint input string.
+ * 3. Extracts and verifies the hash from the input using MD5.
+ * 4. Decodes and decompresses the blueprint data from base64 and gzip formats.
+ * 5. Parses the decompressed data to identify upgradeable buildings.
+ * 6. Dynamically generates sprite selector groups for each building with upgrade paths.
+ * 7. Updates the UI with the generated groups and sets the selected sprite.
+ * 8. Stores the decoded state and triggers encoding.
+ * 
+ * @throws {Error} If the blueprint input is empty, the hash does not match, or decoding fails.
+ */
 function Decode() {
   var predata;
   if (optionsGrid) {
@@ -330,39 +405,28 @@ function Decode() {
   try {
     const inputIndex = bp_string.lastIndexOf('"');
     const hashed_data = bp_string.substring(0, inputIndex);
-    console.log('hashed_data', hashed_data)
     let encodedData = bp_string.split('"')[1];
-    console.log('encodedData', encodedData)
-    // console.log(bp_string)
     predata = bp_string.substring(0, bp_string.indexOf('"'));
     let givenHash = bp_string.substring(bp_string.lastIndexOf('"') + 1);
     let md5Hash = md5(new stringToBytes(hashed_data), true, true);
-    // console.log(hashed_data)
-    console.log('GivenHash  : ' + givenHash.toLowerCase())
-    console.log('InputHashed: ' + md5Hash.toLowerCase())
     if (md5Hash.trim().toLowerCase() !== givenHash.trim().toLowerCase()) {
       const error = new Error(`Invalid input:.\n Calculated hash:${
           md5Hash.toLowerCase()},\nExpected hash:${givenHash.toLowerCase()}`);
       error.name = 'HashMismatchError';
       throw error;
     }
-    // document.getElementById('output').innerHTML = md5Hash;
-    //     bp_string.split(',')[11].split('"')[2].toLowerCase();
     base64data = crypt.base64ToBytes(encodedData)
     let decodedData = pako.ungzip(base64data);
 
     let hexList = byteArrayToHexString(decodedData)
     tempCompare = hexList
-    console.log(hexList)
-    // console.log(hexList.split('9bffffff'))
     let hexsplit = hexList.split('9bffffff')
-    // window.decodedData = hexsplit
     let dynamicSelectionGroups = {};
     for (const i in hexsplit) {
       if (i == 0) {
         continue
       }
-      // console.log(i)
+
       const buildingIdHexLECorrected =
           hexsplit[i].slice(10, 12) + hexsplit[i].slice(8, 10);
       let buildingId = parseInt(buildingIdHexLECorrected, 16)
@@ -370,23 +434,33 @@ function Decode() {
       if (!upgradePaths[buildingId]) {
         continue
       }
-      const groupDefinition = upgradePaths[buildingId];
-      // console.log(groupDefinition)
-      const groupTitle = groupDefinition.title;
-      const itemIdsForGroup = groupDefinition.upgrades;
-      //===========================
-      if (!dynamicSelectionGroups[groupTitle]) {
-        const spriteConfig = groupSpriteDetails[groupTitle];
-        if (!spriteConfig) {
-          console.warn(`Missing spriteConfig for group: ${groupTitle}`);
+
+      const groupKey = buildingId;
+
+      if (!dynamicSelectionGroups[groupKey]) {
+        const groupDefinition = upgradePaths[buildingId];
+        const groupTitle =
+            itemsData[buildingId]?.name || `Building ID: ${buildingId}`;
+        const itemIdsForGroup = groupDefinition.upgrades;
+        const groupIndex = buildingsWanted.findIndex(
+            wantedGroup => JSON.stringify(wantedGroup) ===
+                JSON.stringify(itemIdsForGroup));
+
+        if (groupIndex === -1) {
+          console.warn(`Could not find sprite layout for group: ${
+              groupDefinition.title}`);
           continue;
         }
-        const groupUniqueId =
-            groupTitle.replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
+
+        // Get the specific sprite coordinates from spriteLayoutData using the
+        // found index.
+        const spriteCoordinates = spriteLayoutData[groupIndex];
+
+
+        const groupUniqueId = `building-${buildingId}`;
 
         const groupElement = generateSpriteSelectorGroupHTML(
-            groupTitle, itemIdsForGroup, spriteConfig.baseX, spriteConfig.y,
-            groupUniqueId);
+            groupTitle, itemIdsForGroup, spriteCoordinates, groupUniqueId);
         if (optionsGrid) optionsGrid.appendChild(groupElement);
 
         const spriteContainerInDom =
@@ -396,60 +470,74 @@ function Decode() {
               groupUniqueId} in DOM`);
           continue;
         }
-        const selectorInstance = setupSpriteContainer(
-            spriteContainerInDom, itemIdsForGroup, groupUniqueId);
 
-        dynamicSelectionGroups[groupTitle] = {
+        const selectorInstance = setupSpriteContainer(
+            spriteContainerInDom, itemIdsForGroup, groupUniqueId,
+            groupDefinition.title);
+
+        dynamicSelectionGroups[groupKey] = {
           selectorInstance,
           hexIndices: [],
           itemIds: itemIdsForGroup
         };
       }
 
-      dynamicSelectionGroups[groupTitle].hexIndices.push(i);
+      dynamicSelectionGroups[groupKey].hexIndices.push(i);
 
-      const spriteIndexToSelect = itemIdsForGroup.indexOf(buildingId);
+      const upgradeOptions = dynamicSelectionGroups[groupKey].itemIds;
+      const spriteIndexToSelect = upgradeOptions.indexOf(buildingId);
 
       if (spriteIndexToSelect !== -1) {
-        // selectSprite expects 1-based index
-        dynamicSelectionGroups[groupTitle].selectorInstance.selectSprite(
+        dynamicSelectionGroups[groupKey].selectorInstance.selectSprite(
             spriteIndexToSelect + 1);
       }
     }
-    // Store state for subsequent calls to encode()
-    lastDecodedState = {
-      predata,
-      hexsplit,
-      dynamicSelectionGroups
-    };
+    lastDecodedState = {predata, hexsplit, dynamicSelectionGroups};
     encode();
   } catch (e) {
-    console.error('Error during Decode:', e);
+    console.error('Error during Decode:', e.message);
     showError(`Decoding error: ${e.message || e}`);
     blueprintInput.style.borderColor = 'var(--error-border-color)';
   }
 }
 window.Decode = Decode
 
+/**
+ * Encodes the current blueprint state by updating hex segments based on user selections,
+ * compresses the result using gzip, and generates a final blueprint string with a hash.
+ * The output is set to the 'blueprintOutput' textarea element.
+ *
+ * Preconditions:
+ * - Requires a successful decode to populate `lastDecodedState`.
+ * - Depends on global objects: `itemsData`, `crypt`, `md5`, `stringToBytes`, and `pako`.
+ *
+ * Error Handling:
+ * - Displays warnings and errors if required selections or item data are missing.
+ *
+ * Side Effects:
+ * - Updates the value of the 'blueprintOutput' element in the DOM.
+ *
+ * @returns {void}
+ */
 function encode() {
-  const { predata, hexsplit, dynamicSelectionGroups } = lastDecodedState;
+  const {predata, hexsplit, dynamicSelectionGroups} = lastDecodedState;
 
   if (!predata || !hexsplit || !dynamicSelectionGroups) {
     console.warn('encode called before successful decode. Aborting.');
     return;
   }
-  
-  console.log(dynamicSelectionGroups);
-  console.log(hexsplit);
+
   hideError();
 
   let tempHexSegments = [...hexsplit];
-  for (const groupTitle in dynamicSelectionGroups) {
-    const group = dynamicSelectionGroups[groupTitle];
-    const selectedSpriteOneBasedIndex = group.selectorInstance.getSelectedIndex();
+  for (const groupKey in dynamicSelectionGroups) {
+    const group = dynamicSelectionGroups[groupKey];
+    const selectedSpriteOneBasedIndex =
+        group.selectorInstance.getSelectedIndex();
 
-    // Handle case where nothing is selected (getSelectedIndex might return -1)
     if (selectedSpriteOneBasedIndex <= 0) {
+      const groupTitle =
+          itemsData[groupKey]?.name || `Building ID: ${groupKey}`;
       console.warn(`No selection for group ${groupTitle}. Skipping.`);
       showError(`Error: No selection made for ${groupTitle}.`);
       continue;
@@ -459,7 +547,9 @@ function encode() {
     const buildingNumToEncode = group.itemIds[selectedItemActualIndex];
 
     if (itemsData[buildingNumToEncode] === undefined) {
-      console.warn(`Item data for ID ${buildingNumToEncode} (group ${groupTitle}) not found. Skipping.`);
+      console.warn(
+          `Item data for ID ${buildingNumToEncode} (group for original ID ${
+              groupKey}) not found. Skipping.`);
       showError(`Error: Data for item ID ${buildingNumToEncode} is missing.`);
       continue;
     }
@@ -467,32 +557,30 @@ function encode() {
 
     for (const hexSplitIndex of group.hexIndices) {
       let segmentHex = tempHexSegments[hexSplitIndex];
-      
-      let buildingHexLE = (buildingNumToEncode & 0xFF).toString(16).padStart(2, '0') +
-                        ((buildingNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
-      segmentHex = segmentHex.slice(0, 8) + buildingHexLE + segmentHex.slice(12);
+
+      let buildingHexLE =
+          (buildingNumToEncode & 0xFF).toString(16).padStart(2, '0') +
+          ((buildingNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
+      segmentHex =
+          segmentHex.slice(0, 8) + buildingHexLE + segmentHex.slice(12);
 
       let modelHexLE = (modelNumToEncode & 0xFF).toString(16).padStart(2, '0') +
-                     ((modelNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
+          ((modelNumToEncode >> 8) & 0xFF).toString(16).padStart(2, '0');
       segmentHex = segmentHex.slice(0, 12) + modelHexLE + segmentHex.slice(16);
-      
+
       tempHexSegments[hexSplitIndex] = segmentHex;
     }
   }
 
   const finalHexString = tempHexSegments.join('9bffffff');
-  console.log(findStringDifferences(tempCompare, finalHexString));
-  console.log('tempCompare size:', (finalHexString.length / 2 / 1024).toFixed(4), 'KB');
-  
+
   const byteArrayForGzip = hexStringToArray(finalHexString);
 
-  // --- START OF CRITICAL CHANGE ---
-  // Use pako with options to match .NET GZipStream
   const pakoOptions = {
-    level: 6,       // Standard compression level
+    level: 6,
     header: {
-      mtime: 0,     // Set Modification Time to 0 to match original header
-      os: 11        // Set OS to 11 (0x0B) for Windows/NTFS to match original
+      mtime: 0,  // Set Modification Time to 0 to match original header
+      os: 11     // Set OS to 11 (0x0B) for Windows/NTFS to match original
     }
   };
 
@@ -503,12 +591,11 @@ function encode() {
   // NOTE: crypt.bytesToBase64 must be defined elsewhere in your project
   // This assumes it correctly converts a Uint8Array to a Base64 string.
   let encodedBlueprintPart = predata + '"' + crypt.bytesToBase64(zippedData);
-  console.log('encodedBlueprintPart', encodedBlueprintPart);
-  
+
   // NOTE: md5 and stringToBytes must be defined elsewhere in your project
   let newHash = md5(new stringToBytes(encodedBlueprintPart), true, true);
   let finalBlueprintString = encodedBlueprintPart + '"' + newHash.toUpperCase();
-  
+
   document.getElementById('blueprintOutput').value = finalBlueprintString;
 }
 // Make sure this is globally available for your HTML button
@@ -529,19 +616,63 @@ function findStringDifferences(str1, str2) {
   return differences;
 }
 
+/**
+ * Updates all dynamic selection groups of a specific type by selecting a new item in their UI selectors.
+ *
+ * Iterates through all groups in `lastDecodedState.dynamicSelectionGroups`, finds those whose generic title matches
+ * the provided `genericTitle`, and updates their selector to select the item with `newItemId`. After updating,
+ * it calls the `encode` function to persist the changes.
+ *
+ * @param {string} genericTitle - The generic title of the group type to update.
+ * @param {string|number} newItemId - The ID of the new item to select in each matching group.
+ */
+function updateAllGroupsOfType(genericTitle, newItemId) {
+  const {dynamicSelectionGroups} = lastDecodedState;
+  if (!dynamicSelectionGroups) return;
 
+  // Iterate over all the active selectors on the page
+  for (const groupKey in dynamicSelectionGroups) {
+    const group = dynamicSelectionGroups[groupKey];
+
+    // Find the generic title for this group using the original building ID (the
+    // key)
+    const currentGroupGenericTitle = upgradePaths[groupKey]?.title;
+
+    // Check if it's the type of group we want to modify
+    if (currentGroupGenericTitle === genericTitle) {
+      // Find the index of the new item in this selector's list of options
+      const spriteIndexToSelect = group.itemIds.indexOf(newItemId);
+
+      if (spriteIndexToSelect !== -1) {
+        // The selectSprite method expects a 1-based index
+        group.selectorInstance.selectSprite(spriteIndexToSelect + 1);
+      }
+    }
+  }
+
+  // After updating all the relevant UI selectors, encode the result.
+  if (typeof encode === 'function') {
+    encode();
+  }
+}
+
+/**
+ * Converts a byte array to its hexadecimal string representation.
+ *
+ * Each byte in the input array is converted to a two-character hexadecimal string.
+ * If the input is null or undefined, an empty string is returned and an error is logged.
+ *
+ * @param {Uint8Array|number[]} byteArray - The array of bytes to convert.
+ * @returns {string} The hexadecimal string representation of the byte array.
+ */
 function byteArrayToHexString(byteArray) {
-  // Check only for null/undefined. This will now accept a Uint8Array.
   if (!byteArray) {
     console.error('Input byte array is null or undefined.');
     return '';
   }
 
-  // Use Array.from() to safely convert any array-like object (including Uint8Array)
-  // into a standard array that we can map over to create hex strings.
   return Array.from(byteArray)
       .map(byte => {
-        // Ensure the byte is within the 0-255 range and get its hex representation
         const hex = (byte & 0xFF).toString(16);
         // Pad with a leading zero if the hex representation is a single digit
         return hex.length === 1 ? '0' + hex : hex;
@@ -549,12 +680,21 @@ function byteArrayToHexString(byteArray) {
       .join('');
 }
 
+/**
+ * Converts a hexadecimal string into a Uint8Array.
+ *
+ * Each pair of hexadecimal characters in the input string is parsed as a byte.
+ * If an invalid hex byte is encountered, the function logs an error and returns -1.
+ *
+ * @param {string} hexString - The hexadecimal string to convert.
+ * @returns {Uint8Array|number} A Uint8Array representing the bytes of the hex string,
+ * or -1 if an invalid byte is found.
+ */
 function hexStringToArray(hexString) {
   const int8Array = [];
   for (let i = 0; i < hexString.length; i += 2) {
     const byteHex = hexString.substring(i, i + 2);
 
-    // 3. Parse the two-character hex string to an unsigned byte value (0-255)
     const unsignedByteValue = parseInt(byteHex, 16);
 
     if (isNaN(unsignedByteValue)) {
@@ -565,11 +705,26 @@ function hexStringToArray(hexString) {
     int8Array.push(unsignedByteValue);
   }
 
-  return new Uint8Array(int8Array);;
+  return new Uint8Array(int8Array);
+  ;
 }
 
 
 
+/**
+ * Splits a byte array into segments using a specified delimiter array.
+ *
+ * @param {number[]} byteArray - The input array of bytes to be split.
+ * @returns {number[][]} An array of byte segments, split by the delimiter.
+ *
+ * @example
+ * // Assuming delimiterArray = [0xFF, 0x00]
+ * const byteArray = [1, 2, 0xFF, 0x00, 3, 4];
+ * const segments = splitByteArrayByDelimiter(byteArray);
+ * // segments: [[1, 2], [3, 4]]
+ *
+ * @throws {ReferenceError} If delimiterArray is not defined in the scope.
+ */
 function splitByteArrayByDelimiter(byteArray) {
   const result = [];
   let currentSegment = [];
@@ -586,21 +741,19 @@ function splitByteArrayByDelimiter(byteArray) {
         }
       }
     } else {
-      match = false;  // Not enough bytes left for a full delimiter
+      match = false;
     }
 
     if (match) {
-      result.push(currentSegment);  // Add the segment before the delimiter
-      currentSegment = [];          // Start a new segment
-      i += delimiterArray.length;   // Move past the delimiter
+      result.push(currentSegment);
+      currentSegment = [];
+      i += delimiterArray.length;
     } else {
-      currentSegment.push(byteArray[i]);  // Add current byte to segment
-      i++;                                // Move to the next byte
+      currentSegment.push(byteArray[i]);
+      i++;
     }
   }
 
-  // Add the last segment (whatever is left after the last delimiter or if no
-  // delimiter was found)
   result.push(currentSegment);
 
   return result;
@@ -625,30 +778,9 @@ function decodeFullBlueprint(fullByteArray) {
   const view = new DataView(buffer);
 
   let currentOffset = 0;
-  const decodedBlueprint = {
-    header: null,
-    areas: [],
-    buildingHeader: null,  // To store the decoded building header
-    segments: []
-  };
+  const decodedBlueprint =
+      {header: null, areas: [], buildingHeader: null, segments: []};
 
-  // 1. Decode Main Header
-  // (Assuming decodeMainHeader is defined elsewhere and returns {header,
-  // bytesRead})
-  /*
-  // Example structure of decodeMainHeader if you were to inline it or call
-  it: function decodeMainHeader(view) { const header = {}; let offset = 0;
-      const headerStructSize = 29;
-      if (view.byteLength < headerStructSize) {
-          header.error = "Input byte array too short for main header.";
-          return { header: header, bytesRead: 0 };
-      }
-      header.version = view.getUint32(offset, true); offset += 4;
-      // ... other main header fields ...
-      header.area_count = view.getUint8(offset); offset += 1;
-      return { header: header, bytesRead: offset };
-  }
-  */
   const mainHeaderResult = decodeMainHeader(view);  // Assumed to be available
   if (mainHeaderResult.header.error) {
     console.error('Error decoding main header:', mainHeaderResult.header.error);
@@ -661,20 +793,6 @@ function decodeFullBlueprint(fullByteArray) {
   decodedBlueprint.header = mainHeaderResult.header;
   currentOffset += mainHeaderResult.bytesRead;
 
-  // 2. Decode Blueprint Areas
-  // (Assuming decodeBlueprintArea is defined elsewhere and returns {area,
-  // bytesRead})
-  /*
-  // Example structure of decodeBlueprintArea if you were to inline it or call
-  it: function decodeBlueprintArea(view, initialOffset) { const area = {}; let
-  offset = initialOffset; const areaStructSize = 14; if ((offset +
-  areaStructSize) > view.byteLength) { area.error = "Not enough data to read
-  BlueprintArea."; return { area: area, bytesRead: 0 };
-      }
-      // ... area fields decoding ...
-      return { area: area, bytesRead: areaStructSize };
-  }
-  */
   if (decodedBlueprint.header && decodedBlueprint.header.area_count > 0) {
     for (let i = 0; i < decodedBlueprint.header.area_count; i++) {
       if (currentOffset >= view.byteLength) {
@@ -698,10 +816,8 @@ function decodeFullBlueprint(fullByteArray) {
     }
   }
 
-  // 3. Decode Building Header
   const buildingHeaderData = {};
   if (currentOffset + 4 <= view.byteLength) {
-    // ("L", "building_count") - uint32
     buildingHeaderData.building_count =
         view.getUint32(currentOffset, true);  // true for littleEndian
     currentOffset += 4;
@@ -710,25 +826,15 @@ function decodeFullBlueprint(fullByteArray) {
     console.error('Not enough data to read Building Header.');
     buildingHeaderData.error = 'Not enough data for Building Header.';
     decodedBlueprint.buildingHeader = buildingHeaderData;
-    // Depending on strictness, you might want to return an error for the
-    // whole blueprint here For now, we'll record the error and try to process
-    // segments with what's left (if anything)
   }
-  console.log(byteArrayToHexString(fullByteArray.slice(currentOffset)))
 
-  // 4. Get the remaining bytes for the segments
-  // Ensure currentOffset does not exceed total length before slicing
   const bytesForSegments = (currentOffset <= fullByteArray.length) ?
       fullByteArray.slice(currentOffset) :
       [];
 
 
-  // 5. Split and Decode Segments
-  // (Assuming splitByteArrayByDelimiter and decodeSegment are defined
-  // elsewhere)
-  const delimiter = [155, 255, 255, 255];  // 0x9bffffff
   let listOfByteSegments = splitByteArrayByDelimiter(
-      bytesForSegments, delimiter);  // Assumed to be available
+      bytesForSegments, delimiterArray);  // Assumed to be available
   listOfByteSegments.shift()
   decodedBlueprint.segments = listOfByteSegments.map(
       segment => decodeSegment(segment));  // Assumed to be available
@@ -894,6 +1000,23 @@ function decodeMainHeader(view) {
 }
 
 
+/**
+ * Decodes a BlueprintArea structure from a DataView starting at the given offset.
+ *
+ * The BlueprintArea structure consists of:
+ * - index (int8)
+ * - parent_index (int8)
+ * - tropic_anchor (uint16, little-endian)
+ * - area_segments (uint16, little-endian)
+ * - anchor_local_offset_x (uint16, little-endian)
+ * - anchor_local_offset_y (uint16, little-endian)
+ * - width (uint16, little-endian)
+ * - height (uint16, little-endian)
+ *
+ * @param {DataView} view - The DataView containing the binary data.
+ * @param {number} initialOffset - The offset in the DataView to start reading from.
+ * @returns {{area: Object, bytesRead: number}} An object containing the decoded area and the number of bytes read.
+ */
 function decodeBlueprintArea(view, initialOffset) {
   const area = {};
   let offset = initialOffset;

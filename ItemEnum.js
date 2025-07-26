@@ -1,32 +1,24 @@
 const upgradePaths = {
   // Conveyor Belts (example: if any belt is found, offer all belt upgrades)
-  2001: { title: "Conveyor Belts:", upgrades: [2001, 2002, 2003] },
-  2002: { title: "Conveyor Belts:", upgrades: [2001, 2002, 2003] },
-  2003: { title: "Conveyor Belts:", upgrades: [2001, 2002, 2003] },
+  2001: { title: "Conveyor Belts", upgrades: [2001, 2002, 2003] },
+  2002: { title: "Conveyor Belts", upgrades: [2001, 2002, 2003] },
+  2003: { title: "Conveyor Belts", upgrades: [2001, 2002, 2003] },
   // Sorters
-  2011: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
-  2012: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
-  2013: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
-  2014: { title: "Sorters:", upgrades: [2011, 2012, 2013, 2014] },
+  2011: { title: "Sorters", upgrades: [2011, 2012, 2013, 2014] },
+  2012: { title: "Sorters", upgrades: [2011, 2012, 2013, 2014] },
+  2013: { title: "Sorters", upgrades: [2011, 2012, 2013, 2014] },
+  2014: { title: "Sorters", upgrades: [2011, 2012, 2013, 2014] },
   // Smelters
-  2302: { title: "Smelters:", upgrades: [2302, 2315, 2319] }, // Assuming 2319 is Negentropy
-  2315: { title: "Smelters:", upgrades: [2302, 2315, 2319] },
-  2319: { title: "Smelters:", upgrades: [2302, 2315, 2319] },
+  2302: { title: "Smelters", upgrades: [2302, 2315, 2319] },
+  2315: { title: "Smelters", upgrades: [2302, 2315, 2319] },
+  2319: { title: "Smelters", upgrades: [2302, 2315, 2319] },
   // Assemblers
-  2303: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] }, // Assuming 2318 Recomposer
-  2304: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] },
-  2305: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] },
-  2318: { title: "Assemblers:", upgrades: [2303, 2304, 2305, 2318] },
+  2303: { title: "Assemblers", upgrades: [2303, 2304, 2305, 2318] },
+  2304: { title: "Assemblers", upgrades: [2303, 2304, 2305, 2318] },
+  2305: { title: "Assemblers", upgrades: [2303, 2304, 2305, 2318] },
+  2318: { title: "Assemblers", upgrades: [2303, 2304, 2305, 2318] },
 };
 
-//todo remove
-const groupSpriteDetails = { // Defines sprite sheet coordinates for each group
-  "Conveyor Belts:": { baseX: 7, y: 7 },
-  "Sorters:":        { baseX: 10, y: 7 },
-  "Smelters:":       { baseX: 8, y: 9 },
-  "Assemblers:":     { baseX: 8, y: 8 }
-  // Add more groups here if they follow the same UI pattern
-};
 
 const spriteLayoutData = [
   // Conveyor Belts (corresponds to buildingsWanted[0])
