@@ -11,7 +11,6 @@
   --button-text-color: #ffffff;
   --sprite-border-color: #ccc;
   --sprite-hover-border-color: #00eeff;
-  /* Brighter yellow for selection */
   --error-bg-color: #ffdddd;
   --error-text-color: #d8000c;
   --error-border-color: #d8000c;
@@ -28,6 +27,7 @@
   --border-color: #4a4e7a;
   --title-color: #61dafb;
   --selection-border-color: var(--title-color);
+  --icon-image: url('icons-item-recipes.webp');
 }
 
 * {
@@ -35,43 +35,43 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  min-height: 100vh;
   background-image: radial-gradient(circle farthest-corner at 50% 100%,
       var(--background-gradient-start) 0%,
       var(--background-gradient-end) 100%);
   background-repeat: no-repeat;
   background-attachment: fixed;
+  padding: 20px;
+  min-height: 100vh;
   color: var(--text-color);
   line-height: 1.6;
-  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 header {
-  text-align: center;
   margin-bottom: 0px;
+  text-align: center;
 }
 
 header h1 {
-  font-size: 2.5em;
   color: #fff;
+  font-size: 2.5em;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .beta {
-  color: #E22;
-  rotate: 35deg;
   translate: -35px -20px;
+  rotate: 35deg;
+  color: #E22;
 }
 
 main {
-  max-width: 1900px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  max-width: 1900px;
 }
 
 section {
@@ -81,15 +81,15 @@ section {
 fieldset {
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 20px;
   background-color: rgba(255, 255, 255, 0.05);
+  padding: 20px;
 }
 
 legend {
-  font-size: 1.2em;
-  font-weight: bold;
   padding: 0 10px;
   color: var(--text-color);
+  font-weight: bold;
+  font-size: 1.2em;
 }
 
 .form-group {
@@ -104,15 +104,13 @@ legend {
 
 textarea,
 input[type="text"] {
-  /* Target only text input specifically */
-  width: 100%;
-  padding: 10px;
-  border-radius: 4px;
   border: 1px solid var(--input-border-color);
+  border-radius: 4px;
   background-color: var(--input-bg-color);
+  padding: 10px;
+  width: 100%;
   color: var(--text-color);
   font-family: monospace;
-  /* Good for blueprint strings */
 }
 
 textarea {
@@ -123,19 +121,18 @@ textarea {
 .button-group {
   display: flex;
   gap: 10px;
-  /* Space between buttons */
   margin-top: 15px;
 }
 
 button {
-  padding: 10px 20px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
   border: none;
   border-radius: 4px;
   background-color: var(--button-bg-color);
+  padding: 10px 20px;
   color: var(--button-text-color);
-  cursor: pointer;
   font-size: 1em;
-  transition: background-color 0.2s ease;
 }
 
 button:hover {
@@ -143,8 +140,8 @@ button:hover {
 }
 
 .upgrade-options h2 {
-  text-align: center;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .options-grid {
@@ -159,55 +156,48 @@ button:hover {
 }
 
 .sprite-selector-group {
+  border: 1px solid var(--border-color);
+  border-radius: var(--container-radius);
   background-color: rgba(255, 255, 255, 0.05);
   padding: 5px 10px;
-  border-radius: var(--container-radius);
-  border: 1px solid var(--border-color);
   text-align: center;
 }
 
 .sprite-selector-group>p:first-child {
-  /* Target the title paragraph */
-  font-weight: bold;
   margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .sprite-container {
   display: flex;
-  justify-content: center;
-  /* Center sprites within container */
-  align-items: center;
   position: relative;
-  border: 2px solid var(--sprite-border-color);
-  padding: var(--container-padding);
+  justify-content: center;
+  align-items: center;
   margin: 10px auto;
-  /* Auto margins for horizontal centering if width is fixed */
-  width: fit-content;
-  /* Adjusts to content */
+  border: 2px solid var(--sprite-border-color);
   border-radius: var(--container-radius);
   background-color: rgba(0, 0, 0, 0.2);
+  padding: var(--container-padding);
+  width: fit-content;
 }
 
 .sprite {
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  margin: var(--sprite-margin);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-image: var(--icon-image);
+  background-repeat: no-repeat;
   width: var(--sprite-size);
   height: var(--sprite-size);
-  background-image: url('icons-item-recipes.webp');
-  background-repeat: no-repeat;
-  margin: var(--sprite-margin);
-  cursor: pointer;
-  opacity: 0.6;
-  /* Slightly more visible default */
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  border: 1px solid transparent;
-  /* for consistent spacing on hover/selection */
-  border-radius: 8px;
-  /* Softer corners for sprites */
   user-select: none;
 }
 
 .sprite:hover {
-  opacity: 0.85;
   transform: scale(1.05);
+  opacity: 0.85;
 }
 
 .sprite.selected {
@@ -219,67 +209,69 @@ button:hover {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  /* Adjust for exact centering */
-  transition: left 0.3s ease-out, opacity 0.2s ease-out;
-  /* Smooth transition, added opacity */
-  pointer-events: none;
+  opacity: 0;
   z-index: 1;
-  height: calc(var(--sprite-size) + var(--sprite-margin));
-  width: calc(var(--sprite-size) + var(--sprite-margin));
+  transition: left 0.2s ease-out, opacity 0.15s ease-out;
   border: var(--selected-border-size) solid var(--sprite-hover-border-color);
   border-radius: 0.75em;
-  opacity: 0;
+  width: calc(var(--sprite-size) + var(--sprite-margin));
+  height: calc(var(--sprite-size) + var(--sprite-margin));
+  pointer-events: none;
 }
 
 .selected-info {
   margin-top: 10px;
-  font-size: 0.9em;
   min-height: 1.2em;
-  /* Prevent layout shifts */
+  font-size: 0.9em;
 }
 
 .error-message {
-  background-color: var(--error-bg-color);
-  color: var(--error-text-color);
-  border: 1px solid var(--error-border-color);
-  padding: 15px;
   margin: 20px 0;
+  border: 1px solid var(--error-border-color);
   border-radius: 4px;
+  background-color: var(--error-bg-color);
+  padding: 15px;
+  color: var(--error-text-color);
   text-align: center;
   white-space: pre-wrap;
 }
 
 
 footer {
-  text-align: center;
-  margin-top: 40px;
-  padding-top: 20px;
   border-top: 1px solid var(--border-color);
-  font-size: 0.9em;
+  padding-top: 0.9em;
   color: #aaa;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.disclaimer-content p {
+  margin: 0;
+  padding: 10px 1.5em; /* Space for the close button */
+  border-top: 1px solid var(--border-color);
+  margin-top: 2em;
+  color: #ccc;
+  font-size: 0.8em;
 }
 
 .icon-grid {
   display: grid;
-  /* Adjust minmax for icon size + gap */
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-  /* gap: 10px; */
-  padding: auto;
-  
   position: relative;
-  /* Crucial for positioning the selection border */
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  padding: auto;
 }
 
 .item-icon {
+  transition: transform 0.15s ease, opacity 0.2s ease;
+  cursor: pointer;
+  margin: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
   width: calc(var(--sprite-size)/1.4);
   height: calc(var(--sprite-size)/1.4);
-  cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background-color: rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, opacity 0.3s ease;
-  margin: auto;
 }
+
 .recipe-display .item-icon {
   margin: 0;
 }
@@ -291,32 +283,28 @@ footer {
 
 .item-icon.disabled {
   opacity: 0.2;
-  cursor: not-allowed;
   filter: grayscale(80%);
+  cursor: not-allowed;
 }
 
 .selection-border {
   position: absolute;
   top: 0;
   left: 0;
-  width: 50px;
-  /* Must match .item-icon size */
-  height: 50px;
-  /* Must match .item-icon size */
+  opacity: 0;
+  transition: transform 0.20s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+  box-shadow: 0 0 10px var(--selection-border-color);
   border: 3px solid var(--selection-border-color);
   border-radius: 8px;
+  width: 50px;
+  height: 50px;
   pointer-events: none;
-  /* Allows clicks to pass through to the icon underneath */
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
-  opacity: 0;
-  /* Hidden by default */
-  box-shadow: 0 0 10px var(--selection-border-color);
 }
 
 .selector-section {
-  background-color: var(--section-bg-color);
   border: 1px solid var(--border-color);
   border-radius: 12px;
+  background-color: var(--section-bg-color);
   padding: 20px;
 }
 
@@ -326,63 +314,55 @@ footer {
   text-align: center;
 }
 
-/* New display style for recipe selector.
-   This replaces the previous narrow, centered style.
-   It now expands to fill the grid cell and has a larger, more consistent height. */
 .recipe-display {
   display: flex;
-  align-items: center;
+  flex-grow: 1;
   justify-content: center;
-  /* Align content to the left */
+  align-items: center;
   gap: 20px;
+  transition: background-color 0.15s, border-color 0.15s;
   cursor: pointer;
-  padding: 15px;
+  margin: 10px auto;
+  border: 1px dashed transparent;
   border-radius: var(--container-radius);
   background-color: rgba(0, 0, 0, 0.2);
-  border: 1px dashed transparent;
-  transition: background-color 0.2s, border-color 0.2s;
-  margin: 10px auto;
-  /* Remove old margin */
-  flex-grow: 1;
-  /* Allow it to fill available space */
+  padding: 15px;
 }
 
 
 
 .recipe-display:hover {
-  background-color: rgba(0, 0, 0, 0.4);
   border-color: var(--border-color);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .recipe-display .item-icon {
-  width: --sprite-size;
-  /* Match the size of upgrade icons for consistency */
-  height: --sprite-size;
+  flex-shrink: 0;
   border: none;
   background-color: transparent;
-  flex-shrink: 0;
+  width: --sprite-size;
+  height: --sprite-size;
 }
 
 .recipe-display span {
-  font-size: 1.2em;
   font-weight: bold;
+  font-size: 1.2em;
 }
 
-/* --- Modal Styles --- */
 .modal-container {
+  display: flex;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
   opacity: 0;
+  z-index: 1000;
+  transition: opacity 0.15s;
+  background-color: rgba(0, 0, 0, 0.75);
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  transition: opacity 0.3s ease;
 }
 
 .modal-container.visible {
@@ -390,36 +370,32 @@ footer {
   pointer-events: auto;
 }
 
-/* New flex container to hold the recipe display and alternate selector */
 .recipe-selection-area {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 1em;
   margin-top: 10px;
 }
 
 .modal-content {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  transition: width 0.15s ;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
   background-color: var(--section-bg-color);
   padding: 20px 30px 30px 30px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  position: relative;
-  /* Define the boundaries and default behavior */
-  min-width: 500px;
   width: 75vw;
+  min-width: 500px;
   max-height: 90vh;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  /* Add a transition for smooth resizing */
-  transition: width 0.3s ease;
 }
 
-/* Override margins for the alternate recipe selector so it sits inline */
 .alternate-recipe-selector {
-  margin: 0 !important;
   flex-shrink: 0;
+  margin: 0 !important;
 }
 
 .modal-content h2 {
@@ -433,27 +409,25 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
-  background: none;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+  cursor: pointer;
   border: none;
+  background: none;
+  padding: 0;
   color: var(--text-color);
   font-size: 2em;
   line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.7;
-  transition: opacity 0.2s;
 }
 
 .modal-close:hover {
   opacity: 1;
 }
 
-/* Ensure icon grid inside the modal IS displayed and scrollable */
 .modal-content .icon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
   gap: 10px;
-  overflow-y: auto;
   padding: 10px;
-  /* Space for scrollbar */
+  overflow-y: auto;
 }

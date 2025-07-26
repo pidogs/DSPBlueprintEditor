@@ -1,99 +1,98 @@
-var base64map =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
+const base64map =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
-    crypt = {
-      // Bit-wise rotation left
-      rotl: function(n, b) {
-        return (n << b) | (n >>> (32 - b));
-      },
+export const crypt = {
+  // Bit-wise rotation left
+  rotl: function(n, b) {
+    return (n << b) | (n >>> (32 - b));
+  },
 
-      // Bit-wise rotation right
-      rotr: function(n, b) {
-        return (n << (32 - b)) | (n >>> b);
-      },
+  // Bit-wise rotation right
+  rotr: function(n, b) {
+    return (n << (32 - b)) | (n >>> b);
+  },
 
-      // Swap big-endian to little-endian and vice versa
-      endian: function(n) {
-        // If number given, swap endian
-        if (n.constructor == Number) {
-          return crypt.rotl(n, 8) & 0x00FF00FF | crypt.rotl(n, 24) & 0xFF00FF00;
-        }
+  // Swap big-endian to little-endian and vice versa
+  endian: function(n) {
+    // If number given, swap endian
+    if (n.constructor == Number) {
+      return crypt.rotl(n, 8) & 0x00FF00FF | crypt.rotl(n, 24) & 0xFF00FF00;
+    }
 
-        // Else, assume array and swap all items
-        for (var i = 0; i < n.length; i++) n[i] = crypt.endian(n[i]);
-        return n;
-      },
+    // Else, assume array and swap all items
+    for (var i = 0; i < n.length; i++) n[i] = crypt.endian(n[i]);
+    return n;
+  },
 
-      // Generate an array of any length of random bytes
-      randomBytes: function(n) {
-        for (var bytes = []; n > 0; n--)
-          bytes.push(Math.floor(Math.random() * 256));
-        return bytes;
-      },
+  // Generate an array of any length of random bytes
+  randomBytes: function(n) {
+    for (var bytes = []; n > 0; n--)
+      bytes.push(Math.floor(Math.random() * 256));
+    return bytes;
+  },
 
-      // Convert a byte array to big-endian 32-bit words
-      bytesToWords: function(bytes) {
-        for (var words = [], i = 0, b = 0; i < bytes.length; i++, b += 8)
-          words[b >>> 5] |= bytes[i] << (24 - b % 32);
-        return words;
-      },
+  // Convert a byte array to big-endian 32-bit words
+  bytesToWords: function(bytes) {
+    for (var words = [], i = 0, b = 0; i < bytes.length; i++, b += 8)
+      words[b >>> 5] |= bytes[i] << (24 - b % 32);
+    return words;
+  },
 
-      // Convert big-endian 32-bit words to a byte array
-      wordsToBytes: function(words) {
-        for (var bytes = [], b = 0; b < words.length * 32; b += 8)
-          bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
-        return bytes;
-      },
+  // Convert big-endian 32-bit words to a byte array
+  wordsToBytes: function(words) {
+    for (var bytes = [], b = 0; b < words.length * 32; b += 8)
+      bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
+    return bytes;
+  },
 
-      // Convert a byte array to a hex string
-      bytesToHex: function(bytes) {
-        for (var hex = [], i = 0; i < bytes.length; i++) {
-          hex.push((bytes[i] >>> 4).toString(16));
-          hex.push((bytes[i] & 0xF).toString(16));
-        }
-        return hex.join('');
-      },
+  // Convert a byte array to a hex string
+  bytesToHex: function(bytes) {
+    for (var hex = [], i = 0; i < bytes.length; i++) {
+      hex.push((bytes[i] >>> 4).toString(16));
+      hex.push((bytes[i] & 0xF).toString(16));
+    }
+    return hex.join('');
+  },
 
-      // Convert a hex string to a byte array
-      hexToBytes: function(hex) {
-        for (var bytes = [], c = 0; c < hex.length; c += 2)
-          bytes.push(parseInt(hex.substr(c, 2), 16));
-        return bytes;
-      },
+  // Convert a hex string to a byte array
+  hexToBytes: function(hex) {
+    for (var bytes = [], c = 0; c < hex.length; c += 2)
+      bytes.push(parseInt(hex.substr(c, 2), 16));
+    return bytes;
+  },
 
-      // Convert a byte array to a base-64 string
-      bytesToBase64: function(bytes) {
-        for (var base64 = [], i = 0; i < bytes.length; i += 3) {
-          var triplet = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
-          for (var j = 0; j < 4; j++)
-            if (i * 8 + j * 6 <= bytes.length * 8)
-              base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F));
-            else
-              base64.push('=');
-        }
-        return base64.join('');
-      },
+  // Convert a byte array to a base-64 string
+  bytesToBase64: function(bytes) {
+    for (var base64 = [], i = 0; i < bytes.length; i += 3) {
+      var triplet = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+      for (var j = 0; j < 4; j++)
+        if (i * 8 + j * 6 <= bytes.length * 8)
+          base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F));
+        else
+          base64.push('=');
+    }
+    return base64.join('');
+  },
 
-      // Convert a base-64 string to a byte array
-      base64ToBytes: function(base64) {
-        // Remove non-base-64 characters
-        base64 = base64.replace(/[^A-Z0-9+\/]/ig, '');
+  // Convert a base-64 string to a byte array
+  base64ToBytes: function(base64) {
+    // Remove non-base-64 characters
+    base64 = base64.replace(/[^A-Z0-9+\/]/ig, '');
 
-        for (var bytes = [], i = 0, imod4 = 0; i < base64.length;
-             imod4 = ++i % 4) {
-          if (imod4 == 0) continue;
-          bytes.push(
-              ((base64map.indexOf(base64.charAt(i - 1)) &
-                (Math.pow(2, -2 * imod4 + 8) - 1))
-               << (imod4 * 2)) |
-              (base64map.indexOf(base64.charAt(i)) >>> (6 - imod4 * 2)));
-        }
-        return bytes;
-      }
-    };
+    for (var bytes = [], i = 0, imod4 = 0; i < base64.length; imod4 = ++i % 4) {
+      if (imod4 == 0) continue;
+      bytes.push(
+          ((base64map.indexOf(base64.charAt(i - 1)) &
+            (Math.pow(2, -2 * imod4 + 8) - 1))
+           << (imod4 * 2)) |
+          (base64map.indexOf(base64.charAt(i)) >>> (6 - imod4 * 2)));
+    }
+    return bytes;
+  }
+};
 
 
-var charenc = {
+const charenc = {
   // UTF-8 encoding
   utf8: {
     // Convert a string to a byte array
@@ -125,14 +124,14 @@ var charenc = {
   }
 };
 
-function isBuffer(obj) {
+const isBuffer = function(obj) {
   return obj != null && obj.constructor != null &&
       typeof obj.constructor.isBuffer === 'function' &&
       obj.constructor.isBuffer(obj)
 }
 
 // The core
-md5 = function(message, options, Dyson) {
+export const md5 = function(message, options, Dyson) {
   // Convert to byte array
   if (message.constructor == String)
     if (options && options.encoding === 'binary')
@@ -171,17 +170,13 @@ md5 = function(message, options, Dyson) {
     var aa = a, bb = b, cc = c, dd = d;
     //=====================================================
     a = FF(a, b, c, d, m[i + 0], 7, 0xd76aa478);  // 0
-    // console.log(a,b,c,d)
     if (Dyson) {
       d = FF(d, a, b, c, m[i + 1], 12, 0xe8d7b756);  // 1-
     } else {
       d = FF(d, a, b, c, m[i + 1], 12, 0xe8c7b756);  // 1-
     }
-    // console.log(a,b,c,d)
     c = FF(c, d, a, b, m[i + 2], 17, 0x242070db);  // 2
-    // console.log(a,b,c,d)
     b = FF(b, c, d, a, m[i + 3], 22, 0xc1bdceee);  // 3
-    // console.log(a,b,c,d)
     a = FF(a, b, c, d, m[i + 4], 7, 0xf57c0faf);   // 4
     d = FF(d, a, b, c, m[i + 5], 12, 0x4787c62a);  // 5
     if (Dyson) {
@@ -189,13 +184,11 @@ md5 = function(message, options, Dyson) {
     } else {
       c = FF(c, d, a, b, m[i + 6], 17, 0xa8304613);  // 6-
     }
-    b = FF(b, c, d, a, m[i + 7], 22, 0xfd469501);  // 7
-    // console.log(a,b,c,d)
+    b = FF(b, c, d, a, m[i + 7], 22, 0xfd469501);   // 7
     a = FF(a, b, c, d, m[i + 8], 7, 0x698098d8);    // 8
     d = FF(d, a, b, c, m[i + 9], 12, 0x8b44f7af);   // 9
     c = FF(c, d, a, b, m[i + 10], 17, 0xffff5bb1);  // 10
     b = FF(b, c, d, a, m[i + 11], 22, 0x895cd7be);  // 11
-    // console.log(a,b,c,d)
     if (Dyson) {
       a = FF(a, b, c, d, m[i + 12], 7, 0x6b9f1122);  // 12-
     } else {
@@ -208,7 +201,6 @@ md5 = function(message, options, Dyson) {
     } else {
       b = FF(b, c, d, a, m[i + 15], 22, 0x49b40821);  // 15-
     }
-    // console.log(a,b,c,d)
     //================================================
     a = GG(a, b, c, d, m[i + 1], 5, 0xf61e2562);    // 16
     d = GG(d, a, b, c, m[i + 6], 9, 0xc040b340);    // 17
@@ -218,7 +210,6 @@ md5 = function(message, options, Dyson) {
     } else {
       b = GG(b, c, d, a, m[i + 0], 20, 0xe9b6c7aa);  // 19-
     }
-    // console.log(a,b,c,d)
     a = GG(a, b, c, d, m[i + 5], 5, 0xd62f105d);  // 20
     if (Dyson) {
       d = GG(d, a, b, c, m[i + 10], 9, 0x2443453);  // 21-
@@ -227,7 +218,6 @@ md5 = function(message, options, Dyson) {
     }
     c = GG(c, d, a, b, m[i + 15], 14, 0xd8a1e681);  // 22
     b = GG(b, c, d, a, m[i + 4], 20, 0xe7d3fbc8);   // 23
-    // console.log(a,b,c,d)
     if (Dyson) {
       a = GG(a, b, c, d, m[i + 9], 5, 0x21f1cde6);  // 24-
     } else {
@@ -240,12 +230,10 @@ md5 = function(message, options, Dyson) {
     } else {
       b = GG(b, c, d, a, m[i + 8], 20, 0x455a14ed);  // 27-
     }
-    // console.log(a,b,c,d)
     a = GG(a, b, c, d, m[i + 13], 5, 0xa9e3e905);   // 28
     d = GG(d, a, b, c, m[i + 2], 9, 0xfcefa3f8);    // 29
     c = GG(c, d, a, b, m[i + 7], 14, 0x676f02d9);   // 30
     b = GG(b, c, d, a, m[i + 12], 20, 0x8d2a4c8a);  // 31
-    // console.log(a,b,c,d)
     //================================================
     a = HH(a, b, c, d, m[i + 5], 4, 0xfffa3942);    // 32
     d = HH(d, a, b, c, m[i + 8], 11, 0x8771f681);   // 33
@@ -287,7 +275,7 @@ md5 = function(message, options, Dyson) {
     d = (d + dd) >>> 0;
   }
 
-  finalhash = crypt.endian([a, b, c, d]);
+  const finalhash = crypt.endian([a, b, c, d]);
   const digestBytes = new Uint8Array(16);
   new DataView(digestBytes.buffer).setUint32(0, finalhash[0], false);
   new DataView(digestBytes.buffer).setUint32(4, finalhash[1], false);
@@ -319,11 +307,3 @@ md5._ii = function(a, b, c, d, x, s, t) {
 // Package private blocksize
 md5._blocksize = 16;
 md5._digestsize = 16;
-
-function stringToBytes(val) {
-  const result = [];
-  for (let i = 0; i < val.length; i++) {
-    result.push(val.charCodeAt(i));
-  }
-  return result;
-}
