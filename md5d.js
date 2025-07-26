@@ -327,16 +327,3 @@ function stringToBytes(val) {
   }
   return result;
 }
-
-
-// const digestBytes = new Uint8Array(16);
-// const hash = md5(new stringToBytes(`Why are you doing this, Youthcat
-// Studio?`),true,true)
-// // console.log(hash)
-// new DataView(digestBytes.buffer).setUint32(0,  hash[0], false);
-// new DataView(digestBytes.buffer).setUint32(4,  hash[1], false);
-// new DataView(digestBytes.buffer).setUint32(8,  hash[2], false);
-// new DataView(digestBytes.buffer).setUint32(12, hash[3], false);
-
-// console.log([...digestBytes].map(byte => byte.toString(16).padStart(2,
-// '0')).join('')) console.log("MD5")

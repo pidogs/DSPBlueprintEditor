@@ -11,6 +11,10 @@
       rel="stylesheet"
       href="style.css"
     >
+    <link
+      rel="stylesheet"
+      href="icons.css"
+    >
     <!-- Consider moving CSS to style.css -->
   </head>
   <body>
@@ -66,6 +70,23 @@
         class="error-message"
         style="display: none;"
       ></div>
+      <div
+        id="recipe-modal"
+        class="modal-container"
+      >
+        <div class="modal-content">
+          <button
+            id="modal-close-button"
+            class="modal-close"
+          >×</button>
+          <h2>Select a Recipe</h2>
+          <div
+            id="modal-recipe-grid"
+            class="icon-grid"
+          >
+            <!-- Recipe icons will be populated here by JS --></div>
+        </div>
+      </div>
       <footer>
         <a
           href="https://ko-fi.com/pidog"
@@ -78,8 +99,6 @@
         >Source Code</a>
       </footer>
     </main>
-    <!-- Your JS files -->
-    <script src="ItemEnum.js"></script>
     <script src="md5d.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script
