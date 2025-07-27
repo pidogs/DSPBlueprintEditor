@@ -1,4 +1,7 @@
 # DSP Blueprint Modifier
+
+https://pidogs.github.io/DSPBlueprintEditor
+
 ## Project Description
 
 The DSP Blueprint Modifier is a powerful, web-based tool designed to facilitate the modification of blueprint strings for the game Dyson Sphere Program. It goes beyond simple upgrades, allowing users to decode existing blueprints, select new tiers for various buildings, and change recipes for entire groups of crafters. The tool then re-encodes the blueprint with a valid hash, ready to be pasted back into the game.
