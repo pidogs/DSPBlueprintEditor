@@ -1,6 +1,6 @@
 # DSP Blueprint Modifier
 
-https://pidogs.github.io/DSPBlueprintEditor
+[https://pidogs.github.io/DSPBlueprintEditor](https://pidogs.github.io/DSPBlueprintModifier/)
 
 ## Project Description
 
