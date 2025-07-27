@@ -43,6 +43,7 @@ function handleDecode() {
 
   try {
     const decoded = blueprint.decode(bpString);
+    window.decoded = decoded;
     lastDecodedState = {
       predata: decoded.predata,
       hexsplit: decoded.hexsplit,

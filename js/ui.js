@@ -162,15 +162,23 @@ export function getSelections() {
   for (const groupKey in _activeUpgradeSelectors) {
     const selector = _activeUpgradeSelectors[groupKey];
     for (const hexIndex of selector.hexIndices) {
-      selections[hexIndex] = {buildingId: selector.selectedId};
+      // Initialize if it doesn't exist
+      if (!selections[hexIndex]) {
+        selections[hexIndex] = {};
+      }
+      selections[hexIndex].buildingId = selector.selectedId;
     }
   }
 
-  // Get selections from recipe groups
+  // Get selections from recipe groups and MERGE them
   for (const groupKey in _activeRecipeSelectors) {
     const selector = _activeRecipeSelectors[groupKey];
     for (const hexIndex of selector.hexIndices) {
-      selections[hexIndex] = {recipeId: selector.selectedRecipeId};
+      // Initialize if it doesn't exist
+      if (!selections[hexIndex]) {
+        selections[hexIndex] = {};
+      }
+      selections[hexIndex].recipeId = selector.selectedRecipeId;
     }
   }
 
@@ -592,7 +600,7 @@ function _handleModalNavigation(event) {
     const currentIconIndex = icons.indexOf(document.activeElement);
     const gridRect = modalRecipeGrid.getBoundingClientRect();
     const itemRect = icons[0].getBoundingClientRect();
-    const numColumns = Math.round(gridRect.width*.8 / itemRect.width);
+    const numColumns = Math.round((gridRect.width)*.8 / itemRect.width);
 
     let nextIndex = currentIconIndex;
     if (event.key === 'ArrowLeft')
