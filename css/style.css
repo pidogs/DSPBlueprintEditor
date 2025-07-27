@@ -247,7 +247,8 @@ footer {
 
 .disclaimer-content p {
   margin: 0;
-  padding: 10px 1.5em; /* Space for the close button */
+  padding: 10px 1.5em;
+  /* Space for the close button */
   border-top: 1px solid var(--border-color);
   margin-top: 2em;
   color: #ccc;
@@ -382,7 +383,7 @@ footer {
   display: flex;
   position: relative;
   flex-direction: column;
-  transition: width 0.15s ;
+  transition: width 0.15s;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -405,6 +406,26 @@ footer {
   text-align: center;
 }
 
+.modal-search-container {
+  margin-bottom: 15px;
+}
+
+#modal-recipe-search {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  font-size: 1em;
+}
+
+#modal-recipe-search:focus {
+  outline: none;
+  border-color: var(--selection-border-color);
+}
+
+
 .modal-close {
   position: absolute;
   top: 10px;
@@ -426,7 +447,7 @@ footer {
 
 .modal-content .icon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
   gap: 10px;
   padding: 10px;
   overflow-y: auto;

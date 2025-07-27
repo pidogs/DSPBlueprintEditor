@@ -1,5 +1,6 @@
 /**
- * @fileoverview Manages all UI interactions, DOM manipulation, and event handling.
+ * @fileoverview Manages all UI interactions, DOM manipulation, and event
+ * handling.
  */
 
 import * as data from './data.js';
@@ -17,6 +18,7 @@ const errorMessageDiv = document.getElementById('error-message');
 const recipeModal = document.getElementById('recipe-modal');
 const modalCloseButton = document.getElementById('modal-close-button');
 const modalRecipeGrid = document.getElementById('modal-recipe-grid');
+const modalRecipeSearch = document.getElementById('modal-recipe-search');
 
 // --- Module-level State ---
 let _onEncodeCallback = () => {};
@@ -26,14 +28,17 @@ let _currentModalGroupKey = null;
 let _modalSelectionHandler = null;
 let _modalSelectedElement = null;
 
-// --- Public API ---
+
 
 /**
  * Initializes the UI module, setting up static event listeners.
  * @param {object} config - Configuration object with callbacks.
- * @param {function} config.onDecode - Callback for when the decode button is clicked.
- * @param {function} config.onPaste - Callback for when the paste button is clicked.
- * @param {function} config.onCopy - Callback for when the copy button is clicked.
+ * @param {function} config.onDecode - Callback for when the decode button is
+ *     clicked.
+ * @param {function} config.onPaste - Callback for when the paste button is
+ *     clicked.
+ * @param {function} config.onCopy - Callback for when the copy button is
+ *     clicked.
  */
 export function init(config) {
   pasteButton.addEventListener('click', config.onPaste);
@@ -49,6 +54,12 @@ export function init(config) {
     if (event.key === 'Escape' && recipeModal.classList.contains('visible')) {
       _closeRecipeModal();
     }
+  });
+
+  // Modal search listeners
+  modalRecipeSearch.addEventListener('input', _filterModalRecipes);
+  modalRecipeSearch.addEventListener('keydown', (event) => {
+    _handleModalSearchKeydown(event);
   });
 
   // Debounced resize listener to update selection borders
@@ -70,8 +81,10 @@ export function clearOptions() {
 
 /**
  * Renders the dynamic UI options based on the decoded blueprint data.
- * @param {Array<object>} buildings - Array of building data from the blueprint decoder.
- * @param {function} onEncode - The callback function to trigger when a selection changes.
+ * @param {Array<object>} buildings - Array of building data from the blueprint
+ *     decoder.
+ * @param {function} onEncode - The callback function to trigger when a
+ *     selection changes.
  */
 export function renderBlueprintOptions(buildings, onEncode) {
   _onEncodeCallback = onEncode;
@@ -82,11 +95,13 @@ export function renderBlueprintOptions(buildings, onEncode) {
   buildings.forEach(building => {
     // Group upgradeable buildings
     if (data.upgradePaths[building.buildingId]) {
-      const groupKey = building.buildingId; // Group by the specific building ID found
+      const groupKey =
+          building.buildingId;  // Group by the specific building ID found
       if (!upgradeGroups[groupKey]) {
         const groupDef = data.upgradePaths[building.buildingId];
         upgradeGroups[groupKey] = {
-          title: data.itemsData[building.buildingId]?.name || `ID: ${building.buildingId}`,
+          title: data.itemsData[building.buildingId]?.name ||
+              `ID: ${building.buildingId}`,
           genericTitle: groupDef.title,
           itemIds: groupDef.upgrades,
           initialSelection: building.buildingId,
@@ -119,7 +134,8 @@ export function renderBlueprintOptions(buildings, onEncode) {
   // 2. Generate and set up UI for each group
   for (const key in upgradeGroups) {
     const groupData = upgradeGroups[key];
-    const groupElement = _generateSpriteSelectorGroupHTML(groupData.title, groupData.itemIds, key);
+    const groupElement = _generateSpriteSelectorGroupHTML(
+        groupData.title, groupData.itemIds, key);
     optionsGrid.appendChild(groupElement);
     _setupSpriteContainer(groupElement, groupData, key);
   }
@@ -132,9 +148,12 @@ export function renderBlueprintOptions(buildings, onEncode) {
   }
 }
 
+
+
 /**
  * Gathers all current user selections from the UI.
- * @returns {object} An object mapping hexSegmentIndex to the changes to be made.
+ * @returns {object} An object mapping hexSegmentIndex to the changes to be
+ *     made.
  */
 export function getSelections() {
   const selections = {};
@@ -190,7 +209,8 @@ export function hideError() {
  * Generates HTML for a building upgrade selector group.
  */
 function _generateSpriteSelectorGroupHTML(groupTitle, itemIds, groupUniqueId) {
-  let spritesHtml = itemIds.map((itemId, index) => `
+  let spritesHtml = itemIds
+                        .map((itemId, index) => `
     <div
       class="sprite"
       id="sprite-${groupUniqueId}-${itemId}"
@@ -222,14 +242,16 @@ function _generateSpriteSelectorGroupHTML(groupTitle, itemIds, groupUniqueId) {
 function _setupSpriteContainer(containerElement, groupData, groupKey) {
   const border = containerElement.querySelector('.border');
   const sprites = containerElement.querySelectorAll('.sprite');
-  const selectedSpan = containerElement.querySelector(`#selected-name-${groupKey}`);
+  const selectedSpan =
+      containerElement.querySelector(`#selected-name-${groupKey}`);
 
   const selector = {
     selectedId: groupData.initialSelection,
     hexIndices: groupData.hexIndices,
     itemIds: groupData.itemIds,
     updateBorderPosition: () => {
-      const selectedSprite = containerElement.querySelector(`[data-item-id="${selector.selectedId}"]`);
+      const selectedSprite = containerElement.querySelector(
+          `[data-item-id="${selector.selectedId}"]`);
       if (!selectedSprite || !border) {
         if (border) border.style.opacity = 0;
         return;
@@ -243,7 +265,8 @@ function _setupSpriteContainer(containerElement, groupData, groupKey) {
     selectSprite: (itemId) => {
       selector.selectedId = itemId;
       sprites.forEach(s => s.style.opacity = 0.5);
-      const selectedSprite = containerElement.querySelector(`[data-item-id="${itemId}"]`);
+      const selectedSprite =
+          containerElement.querySelector(`[data-item-id="${itemId}"]`);
       if (selectedSprite) {
         selectedSprite.style.opacity = 1;
         selectedSpan.textContent = data.itemsData[itemId]?.name || 'Error';
@@ -271,8 +294,9 @@ function _setupSpriteContainer(containerElement, groupData, groupKey) {
   });
 
   _activeUpgradeSelectors[groupKey] = selector;
-  _activeUpgradeSelectors[groupKey].genericTitle = groupData.genericTitle; // Store for shift-click
-  selector.selectSprite(groupData.initialSelection); // Set initial state
+  _activeUpgradeSelectors[groupKey].genericTitle =
+      groupData.genericTitle;                         // Store for shift-click
+  selector.selectSprite(groupData.initialSelection);  // Set initial state
 }
 
 /**
@@ -281,19 +305,27 @@ function _setupSpriteContainer(containerElement, groupData, groupKey) {
 function _generateRecipeSelectorHTML(groupData, groupKey) {
   const resultItemId = data.recipeIdToResultItemIdMap[groupData.recipeId];
   const recipeName = data.CraftingIdMap[groupData.recipeId] || 'None';
-  const title = `${groupData.name}s (${groupData.count} building${groupData.count > 1 ? 's' : ''})`;
+  const title = `${groupData.name}s (${groupData.count} building${
+      groupData.count > 1 ? 's' : ''})`;
   const alternates = data.alternateRecipesMap[resultItemId];
 
   let alternateSelectorHtml = '';
   if (alternates && alternates.length > 1) {
-    let alternateSpritesHtml = alternates.map(recipe => {
-      const iconValue = recipe.explicit ? `recipe.${recipe.id}` : `item.${recipe.results[0]}`;
-      return `
-        <div class="sprite recipe-alternate" data-recipe-id="${recipe.id}" data-icon="${iconValue}" title="${recipe.name}"></div>`;
-    }).join('');
+    let alternateSpritesHtml =
+        alternates
+            .map(recipe => {
+              const iconValue = recipe.explicit ? `recipe.${recipe.id}` :
+                                                  `item.${recipe.results[0]}`;
+              return `
+        <div class="sprite recipe-alternate" data-recipe-id="${
+                  recipe.id}" data-icon="${iconValue}" title="${
+                  recipe.name}"></div>`;
+            })
+            .join('');
 
     alternateSelectorHtml = `
-      <div id="alternate-selector-${groupKey}" class="sprite-container alternate-recipe-selector">
+      <div id="alternate-selector-${
+        groupKey}" class="sprite-container alternate-recipe-selector">
         <div class="border"></div>
         ${alternateSpritesHtml}
       </div>`;
@@ -303,7 +335,8 @@ function _generateRecipeSelectorHTML(groupData, groupKey) {
     <div class="sprite-selector-group" id="group-${groupKey}">
       <p>${title}</p>
       <div class="recipe-selection-area">
-        <div class="recipe-display" id="recipe-display-${groupKey}" title="Click to change recipe: ${recipeName}">
+        <div class="recipe-display" id="recipe-display-${
+      groupKey}" title="Click to change recipe: ${recipeName}">
           <div class="item-icon" data-icon="item.${resultItemId}"></div>
           <span id="selected-name-${groupKey}">${recipeName}</span>
         </div>
@@ -327,19 +360,23 @@ function _setupRecipeSelector(groupElement, groupData, groupKey) {
   };
 
   // Main recipe display click handler
-  const recipeDisplay = groupElement.querySelector(`#recipe-display-${groupKey}`);
+  const recipeDisplay =
+      groupElement.querySelector(`#recipe-display-${groupKey}`);
   if (recipeDisplay) {
     recipeDisplay.addEventListener('click', () => _openRecipeModal(groupKey));
   }
 
   // Alternate recipe selector logic
-  const altSelectorContainer = groupElement.querySelector(`#alternate-selector-${groupKey}`);
+  const altSelectorContainer =
+      groupElement.querySelector(`#alternate-selector-${groupKey}`);
   if (altSelectorContainer) {
     const border = altSelectorContainer.querySelector('.border');
-    const sprites = altSelectorContainer.querySelectorAll('.sprite.recipe-alternate');
+    const sprites =
+        altSelectorContainer.querySelectorAll('.sprite.recipe-alternate');
 
     selector.updateBorderPosition = () => {
-      const selectedSprite = altSelectorContainer.querySelector(`[data-recipe-id="${selector.selectedRecipeId}"]`);
+      const selectedSprite = altSelectorContainer.querySelector(
+          `[data-recipe-id="${selector.selectedRecipeId}"]`);
       if (!selectedSprite || !border) return;
       border.style.opacity = 1;
       const visualIndex = Array.from(sprites).indexOf(selectedSprite);
@@ -354,7 +391,8 @@ function _setupRecipeSelector(groupElement, groupData, groupKey) {
         _onEncodeCallback();
       }
       sprites.forEach(s => s.style.opacity = 0.5);
-      const selectedSprite = altSelectorContainer.querySelector(`[data-recipe-id="${recipeId}"]`);
+      const selectedSprite =
+          altSelectorContainer.querySelector(`[data-recipe-id="${recipeId}"]`);
       if (selectedSprite) selectedSprite.style.opacity = 1;
       selector.updateBorderPosition();
     };
@@ -364,7 +402,7 @@ function _setupRecipeSelector(groupElement, groupData, groupKey) {
         selectAlternate(parseInt(e.currentTarget.dataset.recipeId, 10));
       });
     });
-    selectAlternate(groupData.recipeId); // Initial selection
+    selectAlternate(groupData.recipeId);  // Initial selection
   }
 
   _activeRecipeSelectors[groupKey] = selector;
@@ -377,9 +415,10 @@ function _openRecipeModal(groupKey) {
   const selector = _activeRecipeSelectors[groupKey];
   if (!selector) return;
 
-  modalRecipeGrid.innerHTML = ''; // Clear previous grid
+  modalRecipeGrid.innerHTML = '';  // Clear previous grid
   const addedResultItemIds = new Set();
-  const availableRecipes = data.craftableRecipesByBuildingType[selector.buildingType] || [];
+  const availableRecipes =
+      data.craftableRecipesByBuildingType[selector.buildingType] || [];
 
   availableRecipes.forEach(recipe => {
     const resultItemId = recipe.results[0];
@@ -392,35 +431,47 @@ function _openRecipeModal(groupKey) {
       icon.dataset.resultItemId = resultItemId;
       icon.dataset.icon = `item.${resultItemId}`;
       icon.title = resultItem.name;
+      icon.setAttribute('tabindex', '0');
+
 
       icon.addEventListener('click', (e) => {
-        const clickedResultItemId = parseInt(e.currentTarget.dataset.resultItemId, 10);
-        // Find the base recipe for this product (it's always sorted to be first)
+        const clickedResultItemId =
+            parseInt(e.currentTarget.dataset.resultItemId, 10);
         const newRecipeId = data.alternateRecipesMap[clickedResultItemId][0].id;
-        
-        // This is a complex operation: we're changing the group's key characteristic (recipeId),
-        // so we need to effectively destroy the old UI element and create a new one.
-        const oldElement = document.getElementById(`group-${_currentModalGroupKey}`);
-        if (oldElement) {
-            // Reconstruct the groupData with the new recipeId
-            const oldGroupData = {
-                name: selector.name || data.itemsData[selector.buildingId]?.name,
-                buildingType: selector.buildingType,
-                recipeId: newRecipeId, // The crucial change
-                count: selector.hexIndices.length,
-                hexIndices: selector.hexIndices,
-            };
-            const newGroupKey = `${selector.buildingType}-${newRecipeId}`;
-            const newElement = _generateRecipeSelectorHTML(oldGroupData, newGroupKey);
-            oldElement.replaceWith(newElement);
 
-            // Remove old selector state and setup the new one
-            delete _activeRecipeSelectors[_currentModalGroupKey];
-            _setupRecipeSelector(newElement, oldGroupData, newGroupKey);
+        // This is a complex operation: we're changing the group's key
+        // characteristic (recipeId), so we need to effectively destroy the old
+        // UI element and create a new one.
+        const oldElement =
+            document.getElementById(`group-${_currentModalGroupKey}`);
+        if (oldElement) {
+          // Reconstruct the groupData with the new recipeId
+          const oldGroupData = {
+            name: selector.name || data.itemsData[selector.buildingId]?.name,
+            buildingType: selector.buildingType,
+            recipeId: newRecipeId,  // The crucial change
+            count: selector.hexIndices.length,
+            hexIndices: selector.hexIndices,
+          };
+          const newGroupKey = `${selector.buildingType}-${newRecipeId}`;
+          const newElement =
+              _generateRecipeSelectorHTML(oldGroupData, newGroupKey);
+          oldElement.replaceWith(newElement);
+
+          // Remove old selector state and setup the new one
+          delete _activeRecipeSelectors[_currentModalGroupKey];
+          _setupRecipeSelector(newElement, oldGroupData, newGroupKey);
         }
 
         _onEncodeCallback();
         _closeRecipeModal();
+      });
+
+      // Update selection border when an icon receives focus
+      icon.addEventListener('focus', (e) => {
+        if (_modalSelectionHandler) {
+          _modalSelectionHandler.moveTo(e.currentTarget);
+        }
       });
 
       modalRecipeGrid.appendChild(icon);
@@ -428,21 +479,166 @@ function _openRecipeModal(groupKey) {
   });
 
   _modalSelectionHandler = _setupGridSelectionHandler(modalRecipeGrid);
-  const currentResultItemId = data.recipeIdToResultItemIdMap[selector.selectedRecipeId];
-  _modalSelectedElement = modalRecipeGrid.querySelector(`[data-result-item-id="${currentResultItemId}"]`);
+  const currentResultItemId =
+      data.recipeIdToResultItemIdMap[selector.selectedRecipeId];
+  _modalSelectedElement = modalRecipeGrid.querySelector(
+      `[data-result-item-id="${currentResultItemId}"]`);
   _modalSelectionHandler.moveTo(_modalSelectedElement);
 
   recipeModal.classList.add('visible');
+  recipeModal.addEventListener('keydown', _handleModalNavigation);
+
+
+  modalRecipeSearch.value = '';
+  _filterModalRecipes();
+
+  // Now, re-select the correct item that was active before opening.
+  _modalSelectedElement = modalRecipeGrid.querySelector(
+      `[data-result-item-id="${currentResultItemId}"]`);
+  if (_modalSelectionHandler) {
+    _modalSelectionHandler.moveTo(_modalSelectedElement);
+  }
+
+  // Focus the input field after a short delay to ensure it's ready.
+  setTimeout(() => modalRecipeSearch.focus(), 50);
 }
+
 
 function _closeRecipeModal() {
   recipeModal.classList.remove('visible');
+  recipeModal.removeEventListener('keydown', _handleModalNavigation);
+  modalRecipeSearch.value = '';
   setTimeout(() => {
     modalRecipeGrid.innerHTML = '';
     _currentModalGroupKey = null;
     _modalSelectionHandler = null;
     _modalSelectedElement = null;
   }, 300);
+}
+
+/**
+ * Handles specific key events on the modal search input.
+ */
+function _handleModalSearchKeydown(event) {
+  switch (event.key) {
+    case 'Enter':
+      event.preventDefault();
+      // Find the currently selected element and click it
+      const selectedIcon =
+          modalRecipeGrid.querySelector('.item-icon.has-selection-border');
+      if (selectedIcon) {
+        selectedIcon.click();
+      }
+      break;
+    case 'Escape':
+      // If the search bar has text, clear it. Otherwise, the window listener
+      // will close the modal.
+      if (modalRecipeSearch.value !== '') {
+        event.preventDefault();  // Prevent modal from closing immediately
+        event.stopPropagation();
+        modalRecipeSearch.value = '';
+        _filterModalRecipes();
+      }
+      break;
+  }
+}
+
+/**
+ * Handles Tab and Arrow Key navigation within the recipe modal.
+ * Traps focus inside the modal.
+ */
+function _handleModalNavigation(event) {
+  if (!['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter']
+          .includes(event.key))
+    return;
+
+  const focusable = [
+    modalRecipeSearch,
+    ...modalRecipeGrid.querySelectorAll(
+        '.item-icon:not([style*="display: none"])'),
+    modalCloseButton,
+  ];
+
+  if (focusable.length <= 2) {  // Only search input and close button
+    if (event.key === 'Tab') event.preventDefault();
+    return;
+  }
+
+  if (event.key === 'Tab') {
+    const currentIndex = focusable.indexOf(document.activeElement);
+    const nextIndex = event.shiftKey ? currentIndex - 1 : currentIndex + 1;
+
+    if (nextIndex < 0) {  // Was on first element, wrap to last
+      event.preventDefault();
+      focusable[focusable.length - 1].focus();
+    } else if (nextIndex >= focusable.length) {  // Was on last element, wrap to
+                                                 // first
+      event.preventDefault();
+      focusable[0].focus();
+    }
+    // Otherwise, let the browser handle tabbing between elements
+  } else if (event.key === 'Enter') {
+    if (document.activeElement &&
+        document.activeElement.classList.contains('item-icon')) {
+      event.preventDefault();
+      document.activeElement.click();
+    }
+  } else if (event.key.startsWith('Arrow')) {
+    // Only navigate with arrows if focus is inside the grid
+    if (!document.activeElement.classList.contains('item-icon')) return;
+
+    event.preventDefault();
+    const icons = focusable.filter(el => el.classList.contains('item-icon'));
+    const currentIconIndex = icons.indexOf(document.activeElement);
+    const gridRect = modalRecipeGrid.getBoundingClientRect();
+    const itemRect = icons[0].getBoundingClientRect();
+    const numColumns = Math.round(gridRect.width*.8 / itemRect.width);
+
+    let nextIndex = currentIconIndex;
+    if (event.key === 'ArrowLeft')
+      nextIndex = Math.max(0, currentIconIndex - 1);
+    else if (event.key === 'ArrowRight')
+      nextIndex = Math.min(icons.length - 1, currentIconIndex + 1);
+    else if (event.key === 'ArrowUp')
+      nextIndex = Math.max(0, currentIconIndex - numColumns);
+    else if (event.key === 'ArrowDown')
+      nextIndex = Math.min(icons.length - 1, currentIconIndex + numColumns);
+
+    if (nextIndex !== currentIconIndex && icons[nextIndex]) {
+      icons[nextIndex].focus();
+    }
+  }
+}
+
+/**
+ * Filters recipes in the modal based on the search input.
+ */
+function _filterModalRecipes() {
+  const searchTerm = modalRecipeSearch.value.toLowerCase();
+  const icons = modalRecipeGrid.querySelectorAll('.item-icon');
+  let firstVisibleIcon = null;
+
+  icons.forEach(icon => {
+    const itemName = icon.title.toLowerCase();
+    if (itemName.includes(searchTerm)) {
+      icon.style.display = '';  // Use default display from CSS
+      icon.setAttribute('tabindex', '0');
+      if (!firstVisibleIcon) {
+        firstVisibleIcon = icon;
+      }
+    } else {
+      icon.style.display = 'none';
+      icon.setAttribute('tabindex', '-1');
+    }
+  });
+
+  // Update the state to reflect the new selection for the 'Enter' key.
+  _modalSelectedElement = firstVisibleIcon;
+
+  // Move the selection border to the first visible item
+  if (_modalSelectionHandler) {
+    _modalSelectionHandler.moveTo(_modalSelectedElement);
+  }
 }
 
 function _setupGridSelectionHandler(container) {
@@ -456,9 +652,17 @@ function _setupGridSelectionHandler(container) {
         border.style.opacity = '0';
         return;
       }
+      // Remove border class from any other icon
+      container.querySelectorAll('.item-icon')
+          .forEach(icon => icon.classList.remove('has-selection-border'));
+
+      // Add border class to the target for the 'Enter' key handler
+      targetElement.classList.add('has-selection-border');
       border.style.opacity = '1';
-      const left = targetElement.offsetLeft - container.clientLeft;
-      const top = targetElement.offsetTop - container.clientTop;
+      const left = targetElement.offsetLeft - container.clientLeft +
+          (targetElement.offsetWidth / 2) - (border.offsetWidth / 2);
+      const top = targetElement.offsetTop - container.clientTop +
+          (targetElement.offsetHeight / 2) - (border.offsetHeight / 2);
       border.style.transform = `translate(${left}px, ${top}px)`;
     }
   };
@@ -479,7 +683,8 @@ function _updateAllSelectorBorders() {
   }
 
   // Update modal selection border if visible
-  if (recipeModal.classList.contains('visible') && _modalSelectionHandler && _modalSelectedElement) {
+  if (recipeModal.classList.contains('visible') && _modalSelectionHandler &&
+      _modalSelectedElement) {
     _modalSelectionHandler.moveTo(_modalSelectedElement);
   }
 }
