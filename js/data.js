@@ -60,9 +60,6 @@ export async function loadGameData() {
       case 'PHOTON_STORE':
         buildingType = 'Ray Receiver';
         break;
-      case 'FRACTIONATE':
-        buildingType = 'Fractionator';
-        break;
       case 'COLLIDE':
         buildingType = 'Miniature Particle Collider';
         break;
