@@ -77,6 +77,28 @@ function _decodeLittleEndianHex(encodedString) {
 
 // --- DECODING LOGIC ---
 
+function _isNewerVersion(currentVersion, referenceVersion = '0.10.31.24697') {
+  const currentParts = currentVersion.split('.').map(Number);
+  const referenceParts = referenceVersion.split('.').map(Number);
+  const maxLength = Math.max(currentParts.length, referenceParts.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    console.log("_isNewerVersion",i,currentParts[i],referenceParts[i])
+    const currentPart = currentParts[i] || 0;
+    const referencePart = referenceParts[i] || 0;
+
+    if (currentPart > referencePart) {
+      return true;  // Current version is newer
+    }
+    if (currentPart < referencePart) {
+      return false;  // Current version is older
+    }
+    // If parts are equal, continue to the next part
+  }
+
+  return true;  // Versions are equal
+}
+
 /**
  * Validates the blueprint hash, decodes from base64, and decompresses the data.
  * @param {string} bp_string - The full blueprint string.
@@ -144,6 +166,10 @@ function _analyzeSegments(decompressedBytes) {
  */
 export function decode(bp_string) {
   const {predata, decompressedBytes} = _validateAndDecompress(bp_string);
+  const validVersion = _isNewerVersion(predata.split(",")[9])
+  if (!validVersion){
+    throw new Error('Blueprint is too old.\nDSP change the blueprint format in version 0.10.31.24697.\nTo fix please paste it down in game and make a new blueprint to upgrade to the latest version.');
+  }
   const {hexsplit, buildings} = _analyzeSegments(decompressedBytes);
 
   return {predata, hexsplit, buildings};
